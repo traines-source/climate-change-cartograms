@@ -1,0 +1,5 @@
+*.log
+working
+node_modules
+__pycache__
+cart
