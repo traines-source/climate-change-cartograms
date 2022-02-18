@@ -3,12 +3,14 @@ import json
 import math
 import random
 from scipy.spatial.distance import cdist
+from osgeo import gdal
+from osgeo import osr
+import numpy as np
 import utils
 
 MAX_DIST_LEGEND = 20
 MAX_DIST_GEO = 3
 WHITE_THRESHOLD = 10
-SAMPLE_COUNT = 10000
 
 def read_json(filename):
     with open(filename, 'r') as f:
@@ -77,26 +79,6 @@ class EquirectangularProjection:
     def y(self, lat):
         return self.RADIUS_GLOBE*(-lat/self.SCALE-self.CENTRAL_PARALLEL)+self.DY
 
-
-class LambertCylindricalEqualareaProjection:
-    CENTRAL_MERIDIAN = 0
-    DX = 0.5
-    DY = 0.5
-    SCALE = 2*math.pi
-
-    def lon(self, x):
-       return (x-self.DX+self.CENTRAL_MERIDIAN)*self.SCALE
-
-    def lat(self, y):
-        return -math.asin(y-self.DY)*self.SCALE
-
-    def x(self, lon):
-        return lon/self.SCALE-self.CENTRAL_MERIDIAN+self.DX
-    
-    def y(self, lat):
-        return math.sin(-lat/self.SCALE)+self.DY
-
-equalarea = LambertCylindricalEqualareaProjection()
 equirect = EquirectangularProjection()
 
 def to_degrees(radians):
@@ -142,7 +124,6 @@ def digitize_map(mapfile, legend):
 
     i = 0
     for y in range(height):
-        #print("Row", y)
         for x in range(width):
             i+=1
             sample = value_at(im, x, y, legend)
@@ -168,7 +149,6 @@ def sample_equalarea(mapfile, legend):
     p = iter(utils.HoboDyerProj())
 
     for lonlat in p:
-        #print(lonlat)
         x = int(round(equirect.x(to_radians(lonlat[0])), 0))
         y = int(round(equirect.y(to_radians(lonlat[1])), 0))
         if x >= width or y >= height or x < 0 or y < 0:
@@ -179,7 +159,6 @@ def sample_equalarea(mapfile, legend):
             values.append(1)
         coords.append(lonlat)
 
-    print("cc", len(coords), len(values), sum(values))
     return coords, values
 
 
@@ -199,55 +178,119 @@ def reduce_to_nearest(samples, samples_data, coords, values, value_field):
                 min_coords_i = i
         if min_dist > MAX_DIST_GEO:
             not_found_ctr += 1
-            #samples_data[j] = None
+            samples_data[j] = None
         else:
             samples_data[j][value_field] = values[min_coords_i]
             
     print("No value for n of m samples:", not_found_ctr, len(samples))
     return (samples, samples_data)
 
-
-
 datasources = [
-#    ("ecoregions_baseline.png", legend_ecoregions, "baseline"),
-#    ("wildfire_rcp26_frequency.png", legend_frequency, "rcp26_freq"),
-#    ("wildfire_rcp26_season_length.png", legend_season_length, "rcp26_slen"),
-#    ("wildfire_rcp34_frequency.png", legend_frequency, "rcp34_freq"),
-#    ("wildfire_rcp34_season_length.png", legend_season_length, "rcp34_slen"),
-#    ("wildfire_rcp85_frequency.png", legend_frequency, "rcp85_freq"),
+    ("ecoregions_baseline.png", legend_ecoregions, "baseline"),
+    ("wildfire_rcp26_frequency.png", legend_frequency, "rcp26_freq"),
+    ("wildfire_rcp26_season_length.png", legend_season_length, "rcp26_slen"),
+    ("wildfire_rcp34_frequency.png", legend_frequency, "rcp34_freq"),
+    ("wildfire_rcp34_season_length.png", legend_season_length, "rcp34_slen"),
+    ("wildfire_rcp85_frequency.png", legend_frequency, "rcp85_freq"),
     ("wildfire_rcp85_season_length.png", legend_season_length, "rcp85_slen"),
 ]
 
-def process():
+def digitize(from_cache=True):
     print("Reading maps...")
     samples, values = sample_equalarea("working/wildfire_rcp85_frequency.png", legend_frequency)
     samples_data = [{} if values[i] != -1 else None for i in range(len(samples))]
 
     for source in datasources:
         print("===", source[0])
-        #coords, values = digitize_map("working/"+source[0], source[1])
-        coords, values = read_json("working/"+source[0]+".cache.json")
+        coords = []
+        values = []
+        if not from_cache:
+            coords, values = digitize_map("working/"+source[0], source[1])
+        else:
+            coords, values = read_json("working/"+source[0]+".cache.json")
 
         samples, samples_data = reduce_to_nearest(samples, samples_data, coords, values, source[2])
 
     print("Writing geojson...")
     geojson = to_geojson(samples, samples_data)
-    write_json("wildfires.geojson", geojson)
+    write_json("working/wildfires.geojson", geojson)
 
 
-def togrid():
-    samples_data = read_json("wildfires.geojson")
+
+def wf_abs_attribute(props, scenario, attribute):
+    if props is None or "baseline" not in props:
+        return 0
+    value = props["baseline"][attribute]
+    if scenario != "baseline":
+        value += props[scenario+"_"+attribute]
+    return max(0, value)
+
+def append_and_maximize(sample, summaries, max_value, scenario, attribute):
+    attribute_value = wf_abs_attribute(sample, scenario, attribute)
+    summaries[scenario][attribute].append(attribute_value)
+    if attribute_value > max_value[attribute]:
+        max_value[attribute] = attribute_value
+
+def scale_down(summaries, max_value, scenario, attribute):
+    return summaries[scenario][attribute] / max_value[attribute] 
+
+def scale_down_and_sum(summaries, max_value, scenario):
+    if len(summaries[scenario]["freq"]) != len(summaries[scenario]["slen"]):
+        raise Exception("freq != slen")
+    for i in range(len(summaries[scenario]["freq"])):
+        value = summaries[scenario]["freq"][i] / max_value["freq"] + summaries[scenario]["slen"][i] / max_value["slen"]
+        summaries[scenario]["total"].append(value)
+        if value > max_value["total"]:
+            max_value["total"] = value
+    
+def write_tiff(arr, scenario):
     p = utils.HoboDyerProj()
+    rows = []
+    for i in range(len(arr)):
+        if i%p.width == 0:
+            rows.append([])
+        rows[-1].append(int(round(arr[i]*255, 0)))
 
-    els = [sample["properties"]["rcp85_slen"] if sample["properties"] is not None and "rcp85_slen" in sample["properties"] else 10 for sample in samples_data["features"]]
-    out = ""
-    for i in range(len(els)):
-        if i%p.width == 0 and i != 0:
-            out += "\n"
-        out += str(els[i])+" "
+    driver = gdal.GetDriverByName('GTiff')
+    dataset = driver.Create("out/"+scenario+".tiff",p.width, p.height, 1, gdal.GDT_Byte )
+    dataset.GetRasterBand(1).WriteArray(np.array(rows))
 
-    with open("wf.dat", 'w') as f:
-        f.write(out)
+    tl = p.transform((180, 90))
+    dataset.SetGeoTransform((-tl[0], tl[0]*2, 0, tl[1], 0, tl[1]*2))
+    srs = osr.SpatialReference()
+    srs.ImportFromProj4(utils.HoboDyerProj.proj4)
+    dataset.SetProjection(srs.ExportToWkt())
+    dataset.FlushCache()
 
-#process()
-togrid()
+def write_tiffs():
+    samples_data = read_json("working/wildfires.geojson")    
+    samples = [sample["properties"] for sample in samples_data["features"]]
+
+    scenarios = [
+        "baseline",
+        "rcp26",
+        "rcp34",
+        "rcp85",
+    ]
+    summaries = {}
+
+    for scenario in scenarios:
+        summaries[scenario] = {"freq":[], "slen":[], "total":[]}
+    max_value = {"freq":0, "slen":0, "total":0}
+
+    for sample in samples:
+        for scenario in scenarios:
+            append_and_maximize(sample, summaries, max_value, scenario, "freq")           
+            append_and_maximize(sample, summaries, max_value, scenario, "slen")
+    
+    for scenario in scenarios:
+        scale_down_and_sum(summaries, max_value, scenario)
+    
+    for scenario in scenarios:
+        for i in range(len(summaries[scenario]["total"])):
+            summaries[scenario]["total"][i] /= max_value["total"]
+        write_tiff(summaries[scenario]["total"], scenario)
+
+
+#digitize()
+write_tiffs()

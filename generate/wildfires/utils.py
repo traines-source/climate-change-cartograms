@@ -16,7 +16,7 @@ class Proj:
 
         self.scale = width/(self.transform((180, 0))[0]*2)
         self.dx, self.dy = self.transform((-180, 90))
-        self.height = self.transform((0, -90))[1]
+        self.height = floor(self.transform((0, -90))[1])
 
     def transform(self, lonlat):
         coord = self.transformer.transform(lonlat[0], lonlat[1])
@@ -53,39 +53,4 @@ class HoboDyerProj(Proj):
     proj4 = "+proj=cea +lon_0=0 +lat_ts=37.5 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"
 
     def __init__(self):
-        super().__init__(HoboDyerProj.proj4, 201)
-
-
-
-
-def to_geojson(coords, values):
-    return {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [coords[i][0], coords[i][1]]
-                },
-                "properties": values[i]
-            } for i in range(len(coords))
-        ]
-    }
-def write_json(filename, data):
-    with open(filename, 'w') as f:
-        json.dump(data, f)
-
-
-def sample(lonlat):
-    return lonlat
-
-def test():
-    p = HoboDyerProj()
-   
-    grid = p.sample_grid(sample)
-
-    flattened = [item for row in grid for item in row]
-    geojson = to_geojson(flattened, [{}] * len(flattened))
-    print(len(flattened))
-    write_json("sampled.geojson", geojson)
+        super().__init__(HoboDyerProj.proj4, 200)
