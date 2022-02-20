@@ -5,6 +5,7 @@ import random
 from scipy.spatial.distance import cdist
 from osgeo import gdal
 from osgeo import osr
+import imageio as iio
 import numpy as np
 import utils
 
@@ -213,7 +214,7 @@ def digitize(from_cache=True):
 
     print("Writing geojson...")
     geojson = to_geojson(samples, samples_data)
-    write_json("working/wildfires.geojson", geojson)
+    write_json("wildfires.geojson", geojson)
 
 
 
@@ -245,25 +246,32 @@ def scale_down_and_sum(summaries, max_value, scenario):
     
 def write_tiff(arr, scenario):
     p = utils.HoboDyerProj()
+    print("min:", min(arr), "max:", max(arr))
     rows = []
     for i in range(len(arr)):
         if i%p.width == 0:
             rows.append([])
-        rows[-1].append(int(round(arr[i]*255, 0)))
+        rows[-1].append(arr[i])
 
     driver = gdal.GetDriverByName('GTiff')
-    dataset = driver.Create("out/"+scenario+".tiff",p.width, p.height, 1, gdal.GDT_Byte )
+    dataset = driver.Create("out/"+scenario+".tiff",p.width, p.height, 1, gdal.GDT_Float32 )
     dataset.GetRasterBand(1).WriteArray(np.array(rows))
 
-    tl = p.transform((180, 90))
-    dataset.SetGeoTransform((-tl[0], tl[0]*2, 0, tl[1], 0, tl[1]*2))
+    tl = p.unscaled_transform((-180, 90))
+    geo = (tl[0], -tl[0]*2/p.width, 0, tl[1], 0, -tl[1]*2/p.height)
+    dataset.SetGeoTransform(geo)
+    print(geo)
     srs = osr.SpatialReference()
     srs.ImportFromProj4(utils.HoboDyerProj.proj4)
     dataset.SetProjection(srs.ExportToWkt())
     dataset.FlushCache()
+    dataset = None
+
+    im = iio.imread("out/"+scenario+".tiff")
+    iio.imwrite("out/"+scenario+".png", np.rint(im*255).astype(np.uint8))
 
 def write_tiffs():
-    samples_data = read_json("working/wildfires.geojson")    
+    samples_data = read_json("wildfires.geojson")    
     samples = [sample["properties"] for sample in samples_data["features"]]
 
     scenarios = [

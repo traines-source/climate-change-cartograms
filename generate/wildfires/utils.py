@@ -19,8 +19,11 @@ class Proj:
         self.height = floor(self.transform((0, -90))[1])
 
     def transform(self, lonlat):
-        coord = self.transformer.transform(lonlat[0], lonlat[1])
+        coord = self.unscaled_transform(lonlat)
         return (coord[0]*self.scale-self.dx, -coord[1]*self.scale-self.dy)
+
+    def unscaled_transform(self, lonlat):
+        return self.transformer.transform(lonlat[0], lonlat[1])
     
     def reverse_transform(self, xy):
         coord = self.reverse_transformer.transform((xy[0]+self.dx)/self.scale, -(xy[1]+self.dy)/self.scale)
@@ -50,7 +53,7 @@ class Proj:
             raise StopIteration
 
 class HoboDyerProj(Proj):
-    proj4 = "+proj=cea +lon_0=0 +lat_ts=37.5 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"
+    proj4 = "+proj=cea +lon_0=0 +lat_ts=37.5 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
 
     def __init__(self):
         super().__init__(HoboDyerProj.proj4, 200)
