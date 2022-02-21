@@ -1,4 +1,3 @@
-import cv2
 import json
 import math
 import random
@@ -28,7 +27,7 @@ def inverse_color(data):
     return data
 
 def colorscale_legend(source, lower, upper):
-    im = cv2.imread(source)
+    im = iio.imread(source)
     height = im.shape[0]
     return [{"color": im[i][0].tolist(), "value": round(upper-(upper-lower)*i/(height-1), 2)} for i in range(height)]
 
@@ -114,7 +113,7 @@ def value_at(im, x, y, legend):
     return False
 
 def digitize_map(mapfile, legend):
-    im = cv2.imread(mapfile)
+    im = iio.imread(mapfile)
     height = im.shape[0]
     width = im.shape[1]
 
@@ -138,7 +137,7 @@ def digitize_map(mapfile, legend):
 
 
 def sample_equalarea(mapfile, legend):
-    im = cv2.imread(mapfile)
+    im = iio.imread(mapfile)
     height = im.shape[0]
     width = im.shape[1]
 
