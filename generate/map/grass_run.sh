@@ -1,20 +1,8 @@
 #!/bin/bash
 set -e
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-GRASS_DIR=$1
+hoboDyer='+proj=cea +lon_0=0 +lat_ts=37.5 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
+photo=${INPUT_DIR}/world.topo.200407.3x21600x10800.png
 
-echo "=== Starting... ==="
-
-test -d ${GRASS_DIR}/equirect || grass -e -c epsg:32662 ${GRASS_DIR}/equirect
-test -d ${GRASS_DIR}/equirect/PERMANENT || grass -e -c ${GRASS_DIR}/equirect/PERMANENT
-test -d ${GRASS_DIR}/hoboDyer || grass -c epsg:4326 ${GRASS_DIR}/hoboDyer --exec g.proj -c proj4='+proj=cea +lon_0=0 +lat_ts=37.5 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
-test -d ${GRASS_DIR}/hoboDyer/PERMANENT || grass -e -c ${GRASS_DIR}/hoboDyer/PERMANENT
-
-echo "equirect..."
-export GRASS_BATCH_JOB=${SCRIPT_DIR}/grass_0_equirect.sh
-grass ${GRASS_DIR}/equirect/PERMANENT
-
-echo "hoboDyer..."
-export GRASS_BATCH_JOB=${SCRIPT_DIR}/grass_1_hoboDyer.sh
-grass ${GRASS_DIR}/hoboDyer/PERMANENT
+gdalwarp -overwrite -r bilinear -ts 7200 0 -s_srs 'epsg:4326' -t_srs "$hoboDyer" $photo /tmp/map.tif
+convert /tmp/map.tif ${SCRIPT_DIR}/out/map.jpg
