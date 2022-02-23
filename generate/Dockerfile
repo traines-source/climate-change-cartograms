@@ -9,3 +9,4 @@ RUN apt-get install -y gdal-bin libgdal-dev proj-bin
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 RUN pip3 install --no-input GDAL==2.4.0 pyproj
+RUN pip3 install --no-input opencv-python && apt-get install ffmpeg libsm6 libxext6  -y
