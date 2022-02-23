@@ -19,7 +19,7 @@ interface MappingCollection {
     }
 };
 
-const crumpledMap = new CrumpledImage(GRID_DIMEN, 0, findTriangles(GRID_DIMEN.x*GRID_DIMEN.y, (x, y) => new Vector(x, y)));
+const crumpledMap = new CrumpledImage(GRID_DIMEN, 2000, findTriangles(GRID_DIMEN.x*GRID_DIMEN.y, (x, y) => new Vector(x, y)));
 
 function findTriangles(elementsCount: number, resolver: (x: number, y: number) => Vector) {
     const triangles: [Vector, Vector, Vector][] = []
