@@ -9,13 +9,28 @@ import imageio as iio
 import os
 
 TARGET_RESOLUTION=(600,300)
+PRESENTATION_RESOLUTION=(200,100)
 
 def read_json(filename):
     with open(filename, 'r') as f:
         return json.load(f)
 
 def write_png(filename, im):
-    iio.imwrite("working/"+filename, np.rint(im*255).astype(np.uint8))
+    iio.imwrite(filename, np.rint(im*255).astype(np.uint8))
+
+def write_dat(filename, im):
+    matrix = "\n".join([" ".join([str(round(cell, 3)) for cell in row]) for row in im])
+    with open(filename, "w") as f:
+        f.write(matrix)
+
+def read_lines(filename):
+    with open(filename, "r") as f:
+        rows = f.readlines()
+        return rows
+
+def write_lines(filename, lines):
+    with open(filename, "w") as f:
+        f.write("".join(lines))
 
 def interpolate_mapping(mapping, x):
     upper = None
@@ -37,7 +52,7 @@ def interpolate_density(i, gap, scenarios, value):
     print("interpolate", value["id"]+"_"+scenarios[i-gap]["id"])
     ratio = (scenarios[i-gap]["y"]-scenarios[i]["y"])/(scenarios[i-gap-1]["y"]-scenarios[i]["y"])
     value["data"][scenarios[i-gap]["id"]] = value["data"][scenarios[i-gap-1]["id"]]*ratio + value["data"][scenarios[i]["id"]]*(1-ratio)
-    filename = value["id"]+"_"+scenarios[i-gap]["id"]+"_interpolation.png"
+    filename = "working/"+value["id"]+"_"+scenarios[i-gap]["id"]+"_interpolation.png"
     write_png(filename, value["data"][scenarios[i-gap]["id"]])
 
 def resized_image(path):    
@@ -115,7 +130,21 @@ def create_permutation(mappings, binaries):
     masked = ma.masked_array(result, mask)
     filled_result = masked.filled(masked.mean())
     filename = permutation_str(binaries)
-    write_png(filename+".png", filled_result)        
+    filename_densities = "working/densities.dat"
+    filename_distorted = "working/distorted.dat"
+    write_dat(filename_densities, filled_result)
+    write_png("working/"+filename+".png", filled_result)        
+
+    os.system("cart {} {} {} {}".format(TARGET_RESOLUTION[0], TARGET_RESOLUTION[1], filename_densities, filename_distorted))
+    distorted = read_lines(filename_distorted)
+    ratio = TARGET_RESOLUTION[0]/PRESENTATION_RESOLUTION[0]
+    if not ratio.is_integer():
+        raise Exception("Target-Presentation ratio must be integer")
+    #matrix = np.reshape(distorted, (TARGET_RESOLUTION[0]+1, TARGET_RESOLUTION[1]+1))
+    #scaled = [matrix[i][j] for i in range(0, len(matrix), int(ratio)) for j in range(0, len(matrix[i]), int(ratio))]
+    #output = np.array(scaled).flatten()
+    output = distorted
+    write_lines("working/"+filename+".csv", output)
 
 
 def create_permutations(mappings):
@@ -142,6 +171,8 @@ def create_permutations(mappings):
             if param["enabled"] and (today_mode or not any_impact):
                 skip_permutation = True
                 break
+        #if not today_mode:
+        #    skip_permutation = True
         
         if not skip_permutation:
             create_permutation(mappings, binaries)
@@ -157,7 +188,7 @@ print("Import densities...")
 import_densities(mappings, "metrics")
 import_densities(mappings, "impacts")
 mask = np.logical_not(resized_image("population/out/mask.tiff").astype(dtype=bool))
-write_png("mask.png", mask)
+write_png("working/mask.png", mask)
 
 print("Create permutations...")
 create_permutations(mappings)
