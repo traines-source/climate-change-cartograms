@@ -25,7 +25,14 @@ reprojectAndSave () {
     echo "Done."
 }
 
-reprojectAndSave "population2020"
-reprojectAndSave "population2100"
+reprojectAndSave "population_baseline"
+reprojectAndSave "population_2100"
+
+echo "Calculating mask..."
+r.proj input=countries output=countries location=wgs84 mapset=PERMANENT method=bilinear_f --overwrite
+r.mapcalc "mask = countries == 32767 ? 0.0 : 1.0" --overwrite
+r.colors map=mask color=grey
+r.out.gdal in=mask output=${SCRIPT_DIR}/out/mask.tiff type=Float32 --overwrite -f -c
+r.out.png -t --overwrite input=mask output=${SCRIPT_DIR}/out/mask.png
 
 chmod a+r ${SCRIPT_DIR}/out/*

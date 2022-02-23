@@ -1,0 +1,157 @@
+{
+    "year": {
+        "label": {
+            "en": "Baseline CO2 Emissions until 2100 according to GCAM reference scenario."
+        },
+        "mapping": [
+            {
+                "id": "2100",
+                "label": {
+                    "en": "2100"
+                },
+                "x": 2100,
+                "y": 1427
+            }
+        ]
+    },
+    "parameters": {
+        "label": {
+            "en": "Mapping of policies and behavioral changes to CO2 emissions."
+        },
+        "mapping": [
+            {
+                "id": "coalplants",
+                "label": {
+                    "en": "Shut down coal plants"
+                },
+                "x": 26,
+                "y": -354
+            },
+            {
+                "id": "gasplants",
+                "label": {
+                    "en": "Shut down gas plants"
+                },
+                "x": 8,
+                "y": -91
+            },
+            {
+                "id": "industry",
+                "label": {
+                    "en": "Make industry CO2 neutral"
+                },
+                "x": 25,
+                "y": -285
+            },
+            {
+                "id": "roadtraffic",
+                "label": {
+                    "en": "Take freight and short distance traffic off the road"
+                },
+                "x": 10,
+                "y": -143
+            },
+            {
+                "id": "buildings",
+                "label": {
+                    "en": "Make buildings CO2 neutral"
+                },
+                "x": 6,
+                "y": -68
+            }
+        ]
+
+    },
+    "metrics": {
+        "label": {
+            "en": "Multiplication metrics"
+        },
+        "mapping": [
+            {
+                "id": "population",
+                "label": {
+                    "en": "Population"
+                }
+            }
+        ]
+    },
+    "metrics_scenarios": {
+        "label": {
+            "en": "Years"
+        },
+        "mapping": [
+            {
+                "id": "2100",
+                "label": {
+                    "en": "2100"
+                }
+            },
+            {
+                "id": "baseline",
+                "label": {
+                    "en": "baseline"
+                }
+            }
+        ]
+    },
+    "impacts": {
+        "label": {
+            "en": "Addition impacts"
+        },
+        "mapping": [
+            {
+                "id": "wildfires",
+                "label": {
+                    "en": "Wildfires"
+                }
+            }
+        ]
+    },
+    "impacts_scenarios": {
+        "label": {
+            "en": "Mapping of cumulative CO2 emissions in GtC to global mean temperature rise in K relative to 1986-2005 mean."
+        },
+        "mapping": [
+            {   
+                "id": "rcp85",
+                "label": {
+                    "en": "RCP8.5"
+                },
+                "x": 2107,
+                "y": 3.6
+            },
+            {
+                "id": "rcp60",
+                "label": {
+                    "en": "RCP6.0"
+                },
+                "x": 1287,
+                "y": 2.0
+            },
+            {
+                "id": "rcp45",
+                "label": {
+                    "en": "RCP4.5"
+                },
+                "x": 832,
+                "y": 1.7
+            },
+            {
+                "id": "rcp26",
+                "label": {
+                    "en": "RCP2.6"
+                },
+                "x": 386,
+                "y": 0.9
+            },
+            {
+                "id": "baseline",
+                "label": {
+                    "en": "2010 levels"
+                },
+                "x": 0,
+                "y": 0
+            }
+        ]
+    }
+}

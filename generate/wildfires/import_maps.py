@@ -253,7 +253,7 @@ def write_tiff(arr, scenario):
         rows[-1].append(arr[i])
 
     driver = gdal.GetDriverByName('GTiff')
-    dataset = driver.Create("out/"+scenario+".tiff",p.width, p.height, 1, gdal.GDT_Float32 )
+    dataset = driver.Create("out/wildfires_"+scenario+".tiff",p.width, p.height, 1, gdal.GDT_Float32 )
     dataset.GetRasterBand(1).WriteArray(np.array(rows))
 
     tl = p.unscaled_transform((-180, 90))
@@ -266,8 +266,8 @@ def write_tiff(arr, scenario):
     dataset.FlushCache()
     dataset = None
 
-    im = iio.imread("out/"+scenario+".tiff")
-    iio.imwrite("out/"+scenario+".png", np.rint(im*255).astype(np.uint8))
+    im = iio.imread("out/wildfires_"+scenario+".tiff")
+    iio.imwrite("out/wildfires_"+scenario+".png", np.rint(im*255).astype(np.uint8))
 
 def write_tiffs():
     samples_data = read_json("wildfires.geojson")    
