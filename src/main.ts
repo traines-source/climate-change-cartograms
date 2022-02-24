@@ -4,6 +4,7 @@ import { CrumpledImage } from "./CrumpledImage";
 const GRID_DIMEN = new Vector(601, 301);
 
 let mappings: MappingCollection | undefined = undefined;
+let initial = true;
 
 interface Label { [id: string]: string }
 interface Mapping {
@@ -35,6 +36,7 @@ function findTriangles(elementsCount: number, resolver: (x: number, y: number) =
 }
 
 function readGrid(grid: string) {
+    console.log(performance.now(), "befread");
     const rows = grid.split("\n")
     rows.pop();
     const vectors: Vector[] = rows.map(row => Vector.fromArray(row.split(" ").map(parseFloat)));
@@ -46,9 +48,12 @@ function readGrid(grid: string) {
         }
         return new Vector(v.x, v.y);
     }
+    console.log(performance.now(), "beftriangles");
     const triangles = findTriangles(vectors.length, resolver);
-    console.log("hey");
-    crumpledMap.update(triangles);    
+    console.log(performance.now(), "hey");
+
+    crumpledMap.update(triangles, !initial);
+    initial = false;
 }
 
 function interpolateMapping(mappings: Mapping[], x: number): number {
@@ -132,6 +137,8 @@ function updateMap() {
     const temperature = interpolateMapping(mappings.impacts_scenarios.mapping, emissions);
     console.log('Temperature forecast:', temperature);
     updateTemperature(temperature);
+
+    console.log(performance.now(), "beffetch");
 
     fetch('data/'+permutationStr(getBinaries())+'.csv')
     .then(response => response.text())
