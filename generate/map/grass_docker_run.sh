@@ -9,6 +9,7 @@ DOCKER_IMAGE=$(cat ../Dockerfile | docker build -q -)
 echo "Running..."
 
 docker run -it --rm \
+-u $(id -u):$(id -g) \
 -e SCRIPT_DIR=${SCRIPT_DIR} \
 -e INPUT_DIR=${INPUT_DIR} \
 -v ${SCRIPT_DIR}:${SCRIPT_DIR} \
@@ -17,4 +18,4 @@ docker run -it --rm \
 $DOCKER_IMAGE \
 bash ${SCRIPT_DIR}/grass_run.sh
 
-mv out/map.jpg ../../res/
+mv out/map*.jpg ../../res/

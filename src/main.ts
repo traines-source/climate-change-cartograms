@@ -20,7 +20,7 @@ interface MappingCollection {
     }
 };
 
-const crumpledMap = new CrumpledImage(GRID_DIMEN, 2000, findTriangles(GRID_DIMEN.x*GRID_DIMEN.y, (x, y) => new Vector(x, y)));
+const crumpledMap = new CrumpledImage(GRID_DIMEN, 2000);
 
 function findTriangles(elementsCount: number, resolver: (x: number, y: number) => Vector) {
     const triangles: [Vector, Vector, Vector][] = []
@@ -36,7 +36,7 @@ function findTriangles(elementsCount: number, resolver: (x: number, y: number) =
 }
 
 function readGrid(grid: string) {
-    console.log(performance.now(), "befread");
+    console.log(performance.now(), "befread"); //500ms
     const rows = grid.split("\n")
     rows.pop();
     const vectors: Vector[] = rows.map(row => Vector.fromArray(row.split(" ").map(parseFloat)));
@@ -49,7 +49,7 @@ function readGrid(grid: string) {
         return new Vector(v.x, v.y);
     }
     console.log(performance.now(), "beftriangles");
-    const triangles = findTriangles(vectors.length, resolver);
+    const triangles = findTriangles(vectors.length, resolver); //600ms
     console.log(performance.now(), "hey");
 
     crumpledMap.update(triangles, !initial);
@@ -128,6 +128,7 @@ function permutationStr(binaries: Mapping[]) {
 }
 
 function updateMap() {
+    console.log(performance.now(), "upd trig")
     if (mappings == undefined) {
         return;
     }
@@ -140,8 +141,14 @@ function updateMap() {
 
     console.log(performance.now(), "beffetch");
 
-    fetch('data/'+permutationStr(getBinaries())+'.csv')
-    .then(response => response.text())
+    fetch('data/'+permutationStr(getBinaries())+'.csv') //100ms
+    .then(response => {
+        console.log(performance.now(), "beftext");
+        const t = response.text();
+        console.log(performance.now(), "afztext");
+        return t;
+
+    })
     .then(grid => readGrid(grid));
 }
 
@@ -166,12 +173,20 @@ function updateTemperature(temperature: number) {
 }
 
 function loadMappings() {
+    console.log(performance.now(), "http1");
     fetch('res/mappings.json')
     .then(response => response.json())
     .then(json => {
+        console.log(performance.now(), "res");
         mappings = json;
         createControls();
-    }); 
+        window.setTimeout(() => {
+            console.log(performance.now(), "faketriang");
+            crumpledMap.setTexCoords(findTriangles(GRID_DIMEN.x*GRID_DIMEN.y, (x, y) => new Vector(x, y))); // 600ms
+            console.log(performance.now(), "afterfaketriang");
+        }, 1);
+    });
+    console.log(performance.now(), "http2");
 }
 
 loadMappings();
