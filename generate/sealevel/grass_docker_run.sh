@@ -15,6 +15,6 @@ docker run -it --rm \
 -e INPUT_DIR=${INPUT_DIR} \
 -v ${SCRIPT_DIR}:${SCRIPT_DIR} \
 -v ${INPUT_DIR}:${INPUT_DIR} \
---workdir ${SCRIPT_DIR} \
+-v grassdb:/grassdb/ \
 $DOCKER_IMAGE \
-python3 import_maps.py
+bash ${SCRIPT_DIR}/grass_run.sh

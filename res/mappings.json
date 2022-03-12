@@ -104,6 +104,12 @@
                 "label": {
                     "en": "Wildfires"
                 }
+            },
+            {
+                "id": "sealevel",
+                "label": {
+                    "en": "Sealevel rising"
+                }
             }
         ]
     },

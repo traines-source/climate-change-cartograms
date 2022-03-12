@@ -8,7 +8,7 @@ import cv2
 import imageio as iio
 import os
 
-TARGET_RESOLUTION=(600,300)
+TARGET_RESOLUTION=(400,200)
 PRESENTATION_RESOLUTION=(200,100)
 
 def read_json(filename):
@@ -97,7 +97,7 @@ def cumulate_co2_emissions(mappings):
             cumul_co2 += param["y"]
     return cumul_co2
 
-def create_permutation(mappings, binaries):
+def create_permutation(mappings, binaries, mask_avg):
     print(permutation_str(binaries))
     year2100 = mappings["year"]["mapping"][0]["enabled"]
     emissions = cumulate_co2_emissions(mappings) if year2100 else 0
@@ -128,7 +128,9 @@ def create_permutation(mappings, binaries):
     print(metrics_product.max(), impacts_sum.max(), result.max())
     result *= 1.0/result.max() 
     masked = ma.masked_array(result, mask)
-    filled_result = masked.filled(masked.mean())
+    if mask_avg is None:
+        mask_avg = masked.mean()
+    filled_result = masked.filled(mask_avg)
     filename = permutation_str(binaries)
     filename_densities = "working/densities.dat"
     filename_distorted = "working/distorted.dat"
@@ -144,15 +146,19 @@ def create_permutation(mappings, binaries):
     #scaled = [matrix[i][j] for i in range(0, len(matrix), int(ratio)) for j in range(0, len(matrix[i]), int(ratio))]
     #output = np.array(scaled).flatten()
     output = distorted
+    
     write_lines("working/"+filename+".csv", output)
+
+    return mask_avg
 
 
 def create_permutations(mappings):
+    mask_avg = None
     binaries = []
     binaries.extend(mappings["year"]["mapping"])
     binaries.extend(mappings["parameters"]["mapping"])
     binaries.extend(mappings["metrics"]["mapping"])
-    binaries.extend(mappings["impacts"]["mapping"])
+    binaries.extend(mappings["impacts"]["mapping"])        
 
     permutation_count = 2**len(binaries)
     useful_permutations = 0
@@ -162,20 +168,23 @@ def create_permutations(mappings):
                 binaries[j]["enabled"] = True
             else:
                 binaries[j]["enabled"] = False
-    
         
         skip_permutation = False
         today_mode = not mappings["year"]["mapping"][0]["enabled"]
         any_impact = max(map(lambda impact: impact["enabled"], mappings["impacts"]["mapping"]))
-        for param in mappings["parameters"]["mapping"]:
-            if param["enabled"] and (today_mode or not any_impact):
-                skip_permutation = True
-                break
+        any_parameters = max(map(lambda param: param["enabled"], mappings["parameters"]["mapping"]))
+
+        if today_mode and not any_parameters:
+            mask_avg = None
+            print("Reset mask avg", permutation_str(binaries))
+
+        if any_parameters and (today_mode or not any_impact):
+            skip_permutation = True
         #if not today_mode:
         #    skip_permutation = True
         
         if not skip_permutation:
-            create_permutation(mappings, binaries)
+            mask_avg = create_permutation(mappings, binaries, mask_avg)
             useful_permutations += 1
         else:
             print("Skipping", permutation_str(binaries))

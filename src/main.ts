@@ -1,7 +1,7 @@
 import { Vector } from "./Vector";
 import { CrumpledImage } from "./CrumpledImage";
 
-const GRID_DIMEN = new Vector(601, 301);
+const GRID_DIMEN = new Vector(401, 201);
 
 let mappings: MappingCollection | undefined = undefined;
 let initial = true;
@@ -38,8 +38,15 @@ function findTriangles(elementsCount: number, resolver: (x: number, y: number) =
 function readGrid(grid: string) {
     console.log(performance.now(), "befread"); //500ms
     const rows = grid.split("\n")
+    console.log(performance.now(), "befread1");
     rows.pop();
-    const vectors: Vector[] = rows.map(row => Vector.fromArray(row.split(" ").map(parseFloat)));
+    console.log(performance.now(), "befread2"); 
+
+    const numbers: number[][] = rows.map(row => row.split(" ").map(parseFloat));
+    console.log(performance.now(), "befread3"); 
+    const vectors: Vector[] = numbers.map(row => Vector.fromArray(row));
+    console.log(performance.now(), "befread4"); 
+
 
     const resolver = (x: number, y: number) => {
         const v = vectors[y*GRID_DIMEN.x+x];

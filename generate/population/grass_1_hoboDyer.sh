@@ -11,7 +11,7 @@ reprojectAndSave () {
     r.proj input=${1} output=${1}_proj location=wgs84 mapset=PERMANENT method=bilinear_f --overwrite
 
     #r.proj input=countries output=countries location=wgs84 mapset=PERMANENT method=nearest --overwrite
-    #r.univar -t zones=countries map=${1}_proj output=out/population_countries_univar_proj.csv --overwrite
+    #r.univar -t zones=countries map=${1}_proj output=${SCRIPT_DIR}/out/population_countries_univar_proj.csv --overwrite
 
     echo "Normalizing..."
     r.mapcalc "${1}_norm = isnull(${1}_proj) ? 0.0 : min(1.0, ${1}_proj/30000.0)" --overwrite
