@@ -24,8 +24,8 @@ Mapping of
 * x: policies and behavioral changes
 * y: reduction in cumulative CO2 emissions until 2100 off of GCAM reference scenario (in between RCP8.5 and 6.0), measured in GtC.
 
-Based on the cumulative CO2 emissions until 2100 by sector according to the GCAM reference scenario, CO2 emissions of individual sectors or groups are reduced by 80%.
-Reduction of road traffic is made up of 80% reduction in CO2 emissions caused by road freight traffic and 80% reduction of short distance travel (< 10 miles) being responsible for at least 66% of total car emissions according to [4].
+Based on the cumulative CO2 emissions until 2100 by sector according to the GCAM reference scenario [2], CO2 emissions of individual sectors or groups are reduced by 80%.
+Reduction of road traffic is made up of 80% reduction in CO2 emissions caused by road freight traffic and 80% reduction of short distance travel (< 10 miles) being responsible for at least 66% of total car emissions according to [5].
 
 Cf.
 1. https://github.com/JGCRI/gcam-core

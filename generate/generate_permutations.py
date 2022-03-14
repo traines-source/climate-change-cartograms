@@ -126,6 +126,7 @@ def create_permutation(mappings, binaries, mask_avg):
         result *= impacts_sum
 
     print(metrics_product.max(), impacts_sum.max(), result.max())
+    # todo normalization over year,params?
     result *= 1.0/result.max() 
     masked = ma.masked_array(result, mask)
     if mask_avg is None:
@@ -176,12 +177,14 @@ def create_permutations(mappings):
 
         if today_mode and not any_parameters:
             mask_avg = None
-            print("Reset mask avg", permutation_str(binaries))
+            print("Reset mask avg")
 
         if any_parameters and (today_mode or not any_impact):
             skip_permutation = True
         #if not today_mode:
         #    skip_permutation = True
+        if any_parameters:
+            skip_permutation = True
         
         if not skip_permutation:
             mask_avg = create_permutation(mappings, binaries, mask_avg)
