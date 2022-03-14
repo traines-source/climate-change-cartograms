@@ -20,6 +20,10 @@ export class Vector {
         return new Vector(this.x + that.x, this.y + that.y);
     }
 
+    times(f: number): Vector {
+        return new Vector(this.x * f, this.y * f);
+    }
+
     withLength(length: number): Vector {
         const ratio = this.length != 0 ? length/this.length : 0;
         return new Vector(this.x*ratio, this.y*ratio);

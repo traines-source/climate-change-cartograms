@@ -3,11 +3,6 @@ body {
     padding: 0;
 }
 
-#map-src {
-    visibility: hidden;
-    display: none;
-}
-
 .controls {
     position: absolute;
     z-index: 100;
@@ -23,4 +18,19 @@ body {
 }
 .temperature {
     font-weight: bold;
+}
+
+#container {
+    position: relative;
+    display: inline-block;
+}
+
+#container .city {
+    position: absolute;
+    display: block;
+    width: 5px;
+    height: 5px;
+    color: white;
+    background-color: red;
+    text-shadow: 1px 1px 2px black;
 }

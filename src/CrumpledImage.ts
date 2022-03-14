@@ -1,6 +1,15 @@
 import { Animator } from "./Animator";
 import { Vector } from "./Vector";
 
+export interface Dependent {
+    triangleIndex: number;
+    s: number;
+    t: number;
+    from?: Vector;
+    to?: Vector;
+    callback: (gridPos: Vector) => void;
+}
+
 export class CrumpledImage {
     private canvas: HTMLCanvasElement;
     private canvasDimen: Vector = Vector.NULL;
@@ -10,6 +19,7 @@ export class CrumpledImage {
     private programInfo: any;
     private gl: WebGLRenderingContext;
     private nonce = 0;
+    private dependents: Dependent[] = [];
 
     constructor(private gridDimen: Vector, private animationDurationMs: number) {
         console.log(performance.now(), "cru1");
@@ -22,7 +32,9 @@ export class CrumpledImage {
         this.setTexture();                     
     }
 
-    setTexCoords(srcTriangles: [Vector, Vector, Vector][]) {
+    setTexCoords(srcTriangles: [Vector, Vector, Vector][], dependents: Dependent[]) {
+        this.dependents = dependents;
+        this.dependentsUpdateFrom(srcTriangles);
         const currentState = this.matrixConvertCoords(srcTriangles);
         this.vertexCount = currentState.length / 2;
         console.log(performance.now(), "befsrc");
@@ -74,10 +86,12 @@ export class CrumpledImage {
         console.log(performance.now(), "received update");
         const newStateCanvas = this.matrixConvertCoords(newState); //200ms
         this.mapTriangles(newStateCanvas);
+        this.dependentsUpdateTo(newState);
 
         this.nonce++;
         if (!animate) {
             this.glInterpolate(0);
+            this.dependentsInterpolate(0);
             return;
         }
         const animator = new Animator();
@@ -90,13 +104,41 @@ export class CrumpledImage {
             const s = performance.now();
             console.log(performance.now(), "started update");
             this.glInterpolate(x);
+            this.dependentsInterpolate(x);
             
             if (isLast) {
-                this.glUpdateFrom(newStateCanvas)
+                this.glUpdateFrom(newStateCanvas);
+                this.dependentsUpdateFrom(newState);
                 console.log(performance.now(), "applied update", performance.now()-s);
             }
             return true;
         });       
+    }
+
+    private weightedTriangle(triangle: [Vector, Vector, Vector], s: number, t: number) {
+        return triangle[0].times((1-t)*(1-s)).add(triangle[1].times(t*(1-s))).add(triangle[2].times(s));
+    }
+
+    private dependentsUpdateFrom(newState: [Vector, Vector, Vector][]) {
+        for (const dependent of this.dependents) {
+            dependent.from = this.weightedTriangle(newState[dependent.triangleIndex], dependent.s, dependent.t);
+            console.log(dependent.triangleIndex, newState[dependent.triangleIndex], dependent.from);
+        }
+    }
+
+    private dependentsUpdateTo(newState: [Vector, Vector, Vector][]) {
+        for (const dependent of this.dependents) {
+            dependent.to = this.weightedTriangle(newState[dependent.triangleIndex], dependent.s, dependent.t);
+        }
+    }    
+
+    private dependentsInterpolate(x: number) {
+        for (const dependent of this.dependents) {
+            if (dependent.from && dependent.to) {
+                const gridPoint = dependent.from.between(dependent.to, x);
+                dependent.callback(gridPoint);
+            }
+        }
     }
 
     private mapTriangles(newState: number[]) {

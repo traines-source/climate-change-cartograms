@@ -2,6 +2,8 @@
 set -e
 
 hoboDyer='+proj=cea +lon_0=0 +lat_ts=37.5 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
+
+# from https://neo.gsfc.nasa.gov/archive/bluemarble/bmng/world_2km/
 photo=${INPUT_DIR}/world.topo.200407.3x21600x10800.png
 
 gdalwarp -overwrite -r bilinear -ts 8192 0 -s_srs 'epsg:4326' -t_srs "$hoboDyer" $photo /tmp/map.tif

@@ -1,7 +1,7 @@
 import { Vector } from "./Vector";
-import { CrumpledImage } from "./CrumpledImage";
+import { CrumpledImage, Dependent } from "./CrumpledImage";
 
-const GRID_DIMEN = new Vector(401, 201);
+const GRID_DIMEN = new Vector(400, 200);
 
 let mappings: MappingCollection | undefined = undefined;
 let initial = true;
@@ -22,12 +22,10 @@ interface MappingCollection {
 
 const crumpledMap = new CrumpledImage(GRID_DIMEN, 2000);
 
-function findTriangles(elementsCount: number, resolver: (x: number, y: number) => Vector) {
+function findTriangles(resolver: (x: number, y: number) => Vector) {
     const triangles: [Vector, Vector, Vector][] = []
-    const rowCount = Math.floor(elementsCount/GRID_DIMEN.x);
-    console.log(rowCount);
-    for (let i=0;i<GRID_DIMEN.y-1; i+=1) {
-        for (let j=0;j<GRID_DIMEN.x-1; j+=1) {
+    for (let i=0;i<GRID_DIMEN.y; i+=1) {
+        for (let j=0;j<GRID_DIMEN.x; j+=1) {
             triangles.push([resolver(j, i), resolver(j+1, i), resolver(j, i+1)]);
             triangles.push([resolver(j+1, i+1), resolver(j+1, i), resolver(j, i+1)]);
         }
@@ -49,14 +47,14 @@ function readGrid(grid: string) {
 
 
     const resolver = (x: number, y: number) => {
-        const v = vectors[y*GRID_DIMEN.x+x];
+        const v = vectors[y*(GRID_DIMEN.x+1)+x];
         if (v == undefined) {
             console.log("hey", x, y);
         }
         return new Vector(v.x, v.y);
     }
     console.log(performance.now(), "beftriangles");
-    const triangles = findTriangles(vectors.length, resolver); //600ms
+    const triangles = findTriangles(resolver); //600ms
     console.log(performance.now(), "hey");
 
     crumpledMap.update(triangles, !initial);
@@ -179,6 +177,38 @@ function updateTemperature(temperature: number) {
     t.innerHTML = Math.round((temperature+1)*10)/10+"";
 }
 
+function v(p: number, q: number, t: number) {
+    return p*(1-t)+q*t;
+}
+
+function createCities(cities: any, triangles: [Vector, Vector, Vector][]): Dependent[] {
+    const dependents: Dependent[] = [];
+    const container = document.getElementById('container');
+    for (let i=0; i<cities.length; i++) {
+        const city = cities[i];
+        const c = document.createElement('span');
+        c.innerHTML = city['name'];
+        c.className = 'city';
+        container?.appendChild(c);
+        const x = city['coordinates'][0];
+        const y = city['coordinates'][1];
+        const evenIndex = (Math.floor(x)+Math.floor(y)*(GRID_DIMEN.x))*2;
+        const uneven = x-Math.floor(x)+y-Math.floor(y) > 1 ? 1 : 0;
+        const index = evenIndex + uneven;
+        console.log(city['name'], index, index%((GRID_DIMEN.x)*2), triangles[index]);
+        dependents.push({
+            callback: (gridPos: Vector) => {
+                c.style.left = gridPos.x/GRID_DIMEN.x*100+'%';
+                c.style.top = gridPos.y/GRID_DIMEN.y*100+'%';
+            },
+            triangleIndex: index,
+            s: 0.5,
+            t: 0.5
+        });
+    }
+    return dependents;
+}
+
 function loadMappings() {
     console.log(performance.now(), "http1");
     fetch('res/mappings.json')
@@ -187,12 +217,18 @@ function loadMappings() {
         console.log(performance.now(), "res");
         mappings = json;
         createControls();
-        window.setTimeout(() => {
-            console.log(performance.now(), "faketriang");
-            crumpledMap.setTexCoords(findTriangles(GRID_DIMEN.x*GRID_DIMEN.y, (x, y) => new Vector(x, y))); // 600ms
-            console.log(performance.now(), "afterfaketriang");
-        }, 1);
+        fetch('res/cities.json')
+        .then(response => response.json())
+        .then(cities => {
+            window.setTimeout(() => {
+                console.log(performance.now(), "faketriang");
+                const triangles = findTriangles((x, y) => new Vector(x, y));
+                crumpledMap.setTexCoords(triangles, createCities(cities, triangles)); // 600ms
+                console.log(performance.now(), "afterfaketriang");
+            }, 1);
+        });       
     });
+    
     console.log(performance.now(), "http2");
 }
 
