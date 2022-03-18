@@ -10,10 +10,8 @@ export interface Dependent {
 }
 
 export class CrumpledImage {
+    private pixelRatio?: number;
     private canvas: HTMLCanvasElement;
-    private canvasDimen: Vector = Vector.NULL;
-    private canvasTl: Vector = Vector.NULL;
-    private imgDimen: Vector = Vector.NULL;
     private vertexCount = 0;
     private programInfo: any;
     private gl: WebGLRenderingContext;
@@ -23,8 +21,9 @@ export class CrumpledImage {
     constructor(private gridDimen: Vector, private animationDurationMs: number) {
         console.log(performance.now(), "cru1");
         this.canvas = <HTMLCanvasElement>document.getElementById('map');
-        this.resizeCanvas();
         this.gl = <WebGLRenderingContext>this.canvas.getContext('webgl');
+        this.pixelRatio = window.devicePixelRatio;  
+        this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas(), false);
         this.glSetup();
         console.log(performance.now(), "cru2");
@@ -34,6 +33,8 @@ export class CrumpledImage {
     setTexCoords(srcTriangles: [Vector, Vector, Vector][], dependents: Dependent[]) {
         this.dependents = dependents;
         this.dependentsUpdateFrom(srcTriangles);
+        this.dependentsUpdateTo(srcTriangles);
+        this.dependentsInterpolate(0);
         const currentState = this.matrixConvertCoords(srcTriangles);
         this.vertexCount = currentState.length / 2;
         console.log(performance.now(), "befsrc");
@@ -44,15 +45,23 @@ export class CrumpledImage {
        
     
         console.log(performance.now(), "aftersetup");
-
-        console.log(performance.now(), this.canvasDimen);
         
     }
 
     private resizeCanvas() {
-        const r = this.canvas.getBoundingClientRect();
-        this.canvasDimen = new Vector(r.width, r.height);
-        this.canvasTl = new Vector(r.top, r.left);
+        if (window.devicePixelRatio == this.pixelRatio) {
+            console.log("resize")
+            const w = document.documentElement.clientWidth || document.body.clientWidth;
+            const h = w*this.gridDimen.y/this.gridDimen.x;
+            const ratio = window.devicePixelRatio || 1;
+            this.canvas.width = w*ratio;
+            this.canvas.height = h*ratio;
+            this.canvas.style.width = w + 'px';
+            this.canvas.style.height = h + 'px';
+            this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+
+            this.pixelRatio = window.devicePixelRatio;
+        }
     }
 
     private getPreferredImgResolution() {
@@ -73,8 +82,7 @@ export class CrumpledImage {
 
     private setTexture() {
         const im = new Image();
-        im.onload = () => {           
-            this.imgDimen = new Vector(im.width, im.height);
+        im.onload = () => {
             this.glTexture(im);
         }
         im.src = "res/map_"+this.getPreferredImgResolution()+"x.jpg";  

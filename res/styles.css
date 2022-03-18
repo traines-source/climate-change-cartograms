@@ -1,4 +1,9 @@
  
+@import url(https://fonts.googleapis.com/css?family=Roboto+Condensed:400,400italic,700);
+
+html {
+    overflow-y: scroll;
+}
 body {
     margin: 0;
     padding: 0;
@@ -26,11 +31,15 @@ body {
 #container {
     position: relative;
     display: inline-block;
-    font-size: 0;
+    overflow: hidden;
+}
+
+#map {
+    display: block;
 }
 
 #container .city {
-    font-size: 16px;
+    font-size: 0.7vmax;
     position: absolute;
     display: block;
     background-color: white;    

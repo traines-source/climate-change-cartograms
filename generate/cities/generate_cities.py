@@ -37,8 +37,8 @@ def get_int(s):
 
 cities = []
 countries = {}
-CITY_COUNT = 30
-MAX_CITIES_PER_COUNTRY = 2
+CITY_COUNT = 40
+MAX_CITIES_PER_COUNTRY = 1
 
 with open('worldcities.csv', newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=',', quotechar='"')
