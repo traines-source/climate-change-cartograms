@@ -3,8 +3,7 @@ import { Vector } from "./Vector";
 
 export interface Dependent {
     triangleIndex: number;
-    s: number;
-    t: number;
+    barycentric: [number, number, number]
     from?: Vector;
     to?: Vector;
     callback: (gridPos: Vector) => void;
@@ -115,20 +114,16 @@ export class CrumpledImage {
         });       
     }
 
-    private weightedTriangle(triangle: [Vector, Vector, Vector], s: number, t: number) {
-        return triangle[0].times((1-t)*(1-s)).add(triangle[1].times(t*(1-s))).add(triangle[2].times(s));
-    }
-
     private dependentsUpdateFrom(newState: [Vector, Vector, Vector][]) {
         for (const dependent of this.dependents) {
-            dependent.from = this.weightedTriangle(newState[dependent.triangleIndex], dependent.s, dependent.t);
+            dependent.from = Vector.euclidianCoordinates(newState[dependent.triangleIndex], dependent.barycentric);
             console.log(dependent.triangleIndex, newState[dependent.triangleIndex], dependent.from);
         }
     }
 
     private dependentsUpdateTo(newState: [Vector, Vector, Vector][]) {
         for (const dependent of this.dependents) {
-            dependent.to = this.weightedTriangle(newState[dependent.triangleIndex], dependent.s, dependent.t);
+            dependent.to = Vector.euclidianCoordinates(newState[dependent.triangleIndex], dependent.barycentric);
         }
     }    
 
@@ -155,7 +150,7 @@ export class CrumpledImage {
     
     private grid2ImgCoords(v: Vector) {
         const scale = 1 / this.gridDimen.x;
-        return new Vector(v.x*scale, v.y*scale*2);
+        return new Vector(v.x*scale, v.y*1/this.gridDimen.y);
     }
     
     private grid2CanvasCoords(v: Vector) {

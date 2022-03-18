@@ -196,14 +196,15 @@ function createCities(cities: any, triangles: [Vector, Vector, Vector][]): Depen
         const uneven = x-Math.floor(x)+y-Math.floor(y) > 1 ? 1 : 0;
         const index = evenIndex + uneven;
         console.log(city['name'], index, index%((GRID_DIMEN.x)*2), triangles[index]);
+        const barycentric = (new Vector(x, y)).barycentricCoordinates(triangles[index]);
+        console.log(x, y, barycentric, Vector.euclidianCoordinates(triangles[index], barycentric));
         dependents.push({
             callback: (gridPos: Vector) => {
                 c.style.left = gridPos.x/GRID_DIMEN.x*100+'%';
                 c.style.top = gridPos.y/GRID_DIMEN.y*100+'%';
             },
             triangleIndex: index,
-            s: 0.5,
-            t: 0.5
+            barycentric: barycentric
         });
     }
     return dependents;

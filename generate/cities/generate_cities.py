@@ -15,6 +15,8 @@ def sort_key(city):
 
 def to_json(cities):
     proj = HoboDyerProj()
+    print(proj.transform((0, -90)))
+    print(proj.reverse_transform((200, 200)))
     return [
         {
             "coordinates": proj.transform((city['lon'], city['lat'])),

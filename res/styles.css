@@ -1,6 +1,9 @@
+ 
 body {
     margin: 0;
     padding: 0;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 400;
 }
 
 .controls {
@@ -23,14 +26,22 @@ body {
 #container {
     position: relative;
     display: inline-block;
+    font-size: 0;
 }
 
 #container .city {
+    font-size: 16px;
     position: absolute;
     display: block;
-    width: 5px;
-    height: 5px;
+    background-color: white;    
+    border: 1px solid black;
+    width: 4px;
+    height: 4px;
+    border-radius: 5px;
+    margin: -5px 0 0 -5px;
     color: white;
-    background-color: red;
     text-shadow: 1px 1px 2px black;
+    white-space: nowrap;
+    line-height: 5px;
+    text-indent: 10px;
 }
