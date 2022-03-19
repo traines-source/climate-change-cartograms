@@ -1,20 +1,16 @@
 import csv
 import json
+import sys
+sys.path.append('../')
 import utils
 
 TARGET_RESOLUTION=(400,200)
-
-class HoboDyerProj(utils.Proj):
-    proj4 = "+proj=cea +lon_0=0 +lat_ts=37.5 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
-
-    def __init__(self):
-        super().__init__(HoboDyerProj.proj4, TARGET_RESOLUTION[0])
 
 def sort_key(city):
     return city['population']
 
 def to_json(cities):
-    proj = HoboDyerProj()
+    proj = utils.HoboDyerProj(TARGET_RESOLUTION[0])
     print(proj.transform((0, -90)))
     print(proj.reverse_transform((200, 200)))
     return [

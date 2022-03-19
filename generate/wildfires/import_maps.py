@@ -1,11 +1,14 @@
 import json
 import math
 import random
-from scipy.spatial.distance import cdist
+import geopandas
+from shapely.geometry import Point
 from osgeo import gdal
 from osgeo import osr
 import imageio as iio
 import numpy as np
+import sys
+sys.path.append('../')
 import utils
 
 MAX_DIST_LEGEND = 20
@@ -161,21 +164,19 @@ def sample_equalarea(mapfile, legend):
 
     return coords, values
 
+def euclidian_dist(a, b):
+    return math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2)
 
 def reduce_to_nearest(samples, samples_data, coords, values, value_field):
-    print("Cdist...")
-    distances = cdist(samples, coords)
+    print("Geo index...", len(coords))
+    s = geopandas.GeoSeries(map(Point, coords)).sindex
     print("Reducing to nearest...")
     not_found_ctr = 0
-    for j in range(len(distances)):
+    for j in range(len(samples)):
         if samples_data[j] is None:
             continue
-        min_dist = distances[j][0]
-        min_coords_i = 0
-        for i in range(len(distances[j])):
-            if distances[j][i] < min_dist:
-                min_dist = distances[j][i]
-                min_coords_i = i
+        min_coords_i = s.nearest(Point(samples[j]))[1][0]
+        min_dist = euclidian_dist(samples[j], coords[min_coords_i])
         if min_dist > MAX_DIST_GEO:
             not_found_ctr += 1
             samples_data[j] = None
@@ -299,5 +300,5 @@ def write_tiffs():
         write_tiff(summaries[scenario]["total"], scenario)
 
 
-#digitize()
+digitize()
 write_tiffs()

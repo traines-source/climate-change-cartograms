@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-SCRIPT_DIR=${SCRIPT_DIR:-$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )}
+SCRIPT_DIR=${SCRIPT_DIR:-$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )/../" &> /dev/null && pwd )}
 INPUT_DIR=${INPUT_DIR:-$SCRIPT_DIR}
 
 echo "Building image..."
@@ -15,6 +15,6 @@ docker run -it --rm \
 -e INPUT_DIR=${INPUT_DIR} \
 -v ${SCRIPT_DIR}:${SCRIPT_DIR} \
 -v ${INPUT_DIR}:${INPUT_DIR} \
---workdir ${SCRIPT_DIR} \
+--workdir ${SCRIPT_DIR}/wildfires/ \
 $DOCKER_IMAGE \
 python3 import_maps.py

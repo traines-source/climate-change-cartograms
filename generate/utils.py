@@ -15,7 +15,8 @@ class Proj:
         self.reverse_transformer = pyproj.Transformer.from_crs(proj_to, proj_from, always_xy=True)
 
         self.scale = width/(self.transform((180, 0))[0]*2)
-        self.dx, self.dy = self.transform((-180, 90))
+        self.dx = self.transform((-180, 0))[0]
+        self.dy = self.transform((0, 90))[1]
         self.height = floor(self.transform((0, -90))[1])
 
     def transform(self, lonlat):
@@ -51,3 +52,15 @@ class Proj:
             return c
         else:
             raise StopIteration
+
+class HoboDyerProj(Proj):
+    proj4 = "+proj=cea +lon_0=0 +lat_ts=37.5 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+
+    def __init__(self, width=200):
+        super().__init__(HoboDyerProj.proj4, width)
+
+class HammerProj(Proj):
+    proj4 = "+proj=hammer"
+
+    def __init__(self):
+        super().__init__(HammerProj.proj4, 1510)
