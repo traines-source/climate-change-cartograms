@@ -19,7 +19,7 @@ def write_png(filename, im):
     iio.imwrite(filename, np.rint(im*255).astype(np.uint8))
 
 def write_dat(filename, im):
-    matrix = "\n".join([" ".join([str(round(cell, 3)) for cell in row]) for row in im])
+    matrix = "\n".join([" ".join([str(cell) for cell in row]) for row in im])
     with open(filename, "w") as f:
         f.write(matrix)
 
@@ -97,7 +97,7 @@ def cumulate_co2_emissions(mappings):
             cumul_co2 += param["y"]
     return cumul_co2
 
-def create_permutation(mappings, binaries, mask_avg):
+def create_permutation(mappings, binaries):
     print(permutation_str(binaries))
     year2100 = mappings["year"]["mapping"][0]["enabled"]
     emissions = cumulate_co2_emissions(mappings) if year2100 else 0
@@ -126,13 +126,12 @@ def create_permutation(mappings, binaries, mask_avg):
         result *= impacts_sum
 
     print(metrics_product.max(), impacts_sum.max(), result.max())
-    # todo normalization over year,params?
-    result *= 1.0/result.max() 
-    masked = ma.masked_array(result, mask)
-    if mask_avg is None:
-        mask_avg = masked.mean()
-    filled_result = masked.filled(mask_avg)
+
     filename = permutation_str(binaries)
+    
+    return {"filename": filename, "data": result}
+
+def write_permutation(filled_result, filename):    
     filename_densities = "working/densities.dat"
     filename_distorted = "working/distorted.dat"
     write_dat(filename_densities, filled_result)
@@ -146,15 +145,30 @@ def create_permutation(mappings, binaries, mask_avg):
     #matrix = np.reshape(distorted, (TARGET_RESOLUTION[0]+1, TARGET_RESOLUTION[1]+1))
     #scaled = [matrix[i][j] for i in range(0, len(matrix), int(ratio)) for j in range(0, len(matrix[i]), int(ratio))]
     #output = np.array(scaled).flatten()
-    output = distorted
-    
+    output = distorted    
     write_lines("working/"+filename+".csv", output)
 
-    return mask_avg
-
+def resolve_buffer(buffer):
+    if len(buffer) == 0:
+        return
+    perm_max = 0.0
+    perm_mean = None
+    for entry in buffer:            
+        entry["data"] = ma.masked_array(entry["data"], mask)
+        if perm_mean is None:
+            perm_mean = entry["data"].mean() #baseline
+        new_max = entry["data"].max()
+        if new_max > perm_max:
+            perm_max = new_max
+    perm_mean *= 1.0/perm_max
+    print("Combo max and mean:", perm_max, perm_mean*1.0/perm_max)
+    for entry in buffer:
+        entry["data"] *= 1.0/perm_max
+        entry["data"] = entry["data"].filled(perm_mean)
+        print("Filled max and mean:", entry["data"].max(), entry["data"].mean(), entry["filename"])
+        write_permutation(entry["data"], entry["filename"])
 
 def create_permutations(mappings):
-    mask_avg = None
     binaries = []
     binaries.extend(mappings["year"]["mapping"])
     binaries.extend(mappings["parameters"]["mapping"])
@@ -163,6 +177,7 @@ def create_permutations(mappings):
 
     permutation_count = 2**len(binaries)
     useful_permutations = 0
+    buffer = []
     for i in range(permutation_count):
         for j in range(len(binaries)):
             if i&(2**j) != 0:
@@ -176,8 +191,9 @@ def create_permutations(mappings):
         any_parameters = max(map(lambda param: param["enabled"], mappings["parameters"]["mapping"]))
 
         if today_mode and not any_parameters:
-            mask_avg = None
-            print("Reset mask avg")
+            resolve_buffer(buffer)
+            buffer = []
+            print("Buffer cleared, new metrics/impacts combo")
 
         if any_parameters and (today_mode or not any_impact):
             skip_permutation = True
@@ -187,10 +203,10 @@ def create_permutations(mappings):
             skip_permutation = True
         
         if not skip_permutation:
-            mask_avg = create_permutation(mappings, binaries, mask_avg)
+            buffer.append(create_permutation(mappings, binaries))
             useful_permutations += 1
-        else:
-            print("Skipping", permutation_str(binaries))
+        #else:
+        #    print("Skipping", permutation_str(binaries))
     
     print("Permutations", useful_permutations, "/", permutation_count)
 
