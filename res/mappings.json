@@ -110,6 +110,12 @@
                 "label": {
                     "en": "Sealevel rising"
                 }
+            },
+            {
+                "id": "wbgt",
+                "label": {
+                    "en": "Unbearable heat"
+                }
             }
         ]
     },
