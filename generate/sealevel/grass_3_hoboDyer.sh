@@ -14,10 +14,10 @@ adjustSealevels () {
     echo "Adjusting sealevel $1"
     M=sealevel_${1}_mapping
     SEALEVEL=1
-    MAPCALC_STRING="isnull(flooding_0) ? 0 : flooding_0"
+    MAPCALC_STRING="isnull(flooding_0) ? 0 : flooding_0*0.5"
     while [ $SEALEVEL -ne $MAX_SEALEVEL ]
     do
-        MAPCALC_STRING="if(${M}==${SEALEVEL}, isnull(flooding_${SEALEVEL}) ? 0 : flooding_${SEALEVEL}, ${MAPCALC_STRING})"
+        MAPCALC_STRING="if(${M}==${SEALEVEL}, isnull(flooding_${SEALEVEL}) ? 0 : flooding_${SEALEVEL}*0.5+flooding_$(($SEALEVEL-1))*0.5, ${MAPCALC_STRING})"
         SEALEVEL=$(($SEALEVEL+1))
     done
     echo $MAPCALC_STRING
