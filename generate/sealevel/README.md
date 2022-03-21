@@ -2,7 +2,7 @@
 
 Sealevel rising is projected according to [1], i.e. about 1.5m for RCP8.5 relative to 1986-2005 mean. For the impact mapping, local 1-year coastal flood return levels ("CoastalDEM_RL1_p50") are taken into account according to [2]. Since CoastalDEM is unfortunately not publicly available, an estimate of impacted regions for each RCP scenario has been rederived based on the "Total current population (millions) occupying vulnerable land" by country/territory from [2], population data from [3], the national identifier grid from [4], and, most importantly, SRTM elevation data from [5]. Be aware that this introduces endogeneity issues for the combined population-sealevel cartograms, since the population data has already been used to estimate the impacted land area.
 
-Grid pixels have values of 0 (not impacted by flooding, or already below sealevel today) and 1 (impacted by flooding). Continuous values between 0 and 1 occur due to bilinear interpolation during reprojection and scaling.
+Grid pixels have values between 0 (not impacted by flooding, or already under water today), and 1 (impacted by flooding).
 
 1. Kopp, Robert E., et al. "Evolving understanding of Antarctic ice‐sheet physics and ambiguity in probabilistic sea‐level projections." Earth's Future 5.12 (2017): 1217-1233. https://doi.org/10.1002/2017EF000663
 2. Kulp, Scott A., and Benjamin H. Strauss. "New elevation data triple estimates of global vulnerability to sea-level rise and coastal flooding." Nature communications 10.1 (2019): 1-12. https://doi.org/10.1038/s41467-019-12808-z Supplementary Data 1. Data licensed under CC-BY-4.0 http://creativecommons.org/licenses/by/4.0 (also see 41467_2019_12808_MOESM4_ESM.csv)
