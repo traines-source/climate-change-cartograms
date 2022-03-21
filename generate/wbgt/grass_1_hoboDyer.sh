@@ -22,10 +22,10 @@ reprojectAndSave () {
     echo "Done."
 }
 
+reprojectAndSave "wbgt_baseline" "wbgt_historical"
 reprojectAndSave "wbgt_rcp26" "wbgt_rcp26"
 reprojectAndSave "wbgt_rcp45" "wbgt_rcp45"
 reprojectAndSave "wbgt_rcp60" "wbgt_rcp60"
 reprojectAndSave "wbgt_rcp85" "wbgt_rcp85"
-reprojectAndSave "wbgt_baseline" "wbgt_historical"
 
 chmod a+r ${SCRIPT_DIR}/out/*

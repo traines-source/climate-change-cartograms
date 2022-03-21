@@ -16,6 +16,12 @@ echo "Mosaicing..."
 r.patch --overwrite input=$MAPS output=wbgt_elev_mosaic --overwrite
 echo "Zeroing..."
 r.mapcalc expression="wbgt_elev_zeroed = isnull(wbgt_elev_mosaic) ? 0 : wbgt_elev_mosaic" --overwrite
+
+#echo "Preparing calibration..."
+#v.in.ogr input=${SCRIPT_DIR}/calibration.geojson output=wbgt_calibration_v --overwrite
+#v.to.rast input=wbgt_calibration_v type=point output=wbgt_calibration_nulls use=attr attribute_column=wbgt --overwrite
+#r.fillnulls input=wbgt_calibration_nulls output=wbgt_calibration_unsmoothed tension=80 --overwrite
+#r.resamp.filter input=wbgt_calibration_unsmoothed output=wbgt_calibration filter=gauss,box radius=5,5 --overwrite
 echo "Done."
 
 calculateForRcp() {
@@ -71,11 +77,26 @@ calculateForRcp() {
     r.series input=${BANDS} output=wbgt_${1}_max method=quantile quantile=0.99 --overwrite
     r.univar wbgt_${1}_max
 
+    #if [ "$1" == "historical" ]; then
+    #    echo "Calibrating..."
+    #    r.mapcalc "wbgt_calibration_delta = wbgt_calibration - wbgt_${1}_max" --overwrite
+    #    r.univar wbgt_calibration_delta
+    #    r.out.gdal in=wbgt_calibration_delta output=${SCRIPT_DIR}/out/calib.tiff type=Float32 --overwrite -f -c
+    #    r.out.png -t --overwrite input=wbgt_calibration_delta output=${SCRIPT_DIR}/out/calib.png
+    #fi    
+
     echo "Normalizing..."
+    #r.mapcalc "wbgt_${1} = min(15.0, max(wbgt_${1}_max+wbgt_calibration_delta-30.0, 0.0))/15.0" --overwrite
     r.mapcalc "wbgt_${1} = min(15.0, max(wbgt_${1}_max-30.0, 0.0))/15.0" --overwrite
 
     echo "Done."
 }
+
+# 2005
+DAY_START=1461
+DAY_MAX=1826
+TIMESPAN=20000101-20051231
+calculateForRcp "historical"
 
 # datasets have timespan 20560101-21001231 -> 45 years -> 16425 bands -> last 365 bands are year 2100
 DAY_START=16061
@@ -86,11 +107,3 @@ calculateForRcp "rcp26"
 calculateForRcp "rcp45"
 calculateForRcp "rcp60"
 calculateForRcp "rcp85"
-
-# 2005
-DAY_START=1461
-DAY_MAX=1826
-TIMESPAN=20000101-20051231
-calculateForRcp "historical"
-
-
