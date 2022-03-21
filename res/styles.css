@@ -42,15 +42,10 @@ body {
     font-size: 0.7vmax;
     position: absolute;
     display: block;
-    background-color: white;    
-    border: 1px solid black;
-    width: 4px;
-    height: 4px;
-    border-radius: 5px;
-    margin: -5px 0 0 -5px;
+    margin: -2.5px 0 0 -2.5px;
     color: white;
     text-shadow: 1px 1px 2px black;
     white-space: nowrap;
     line-height: 5px;
-    text-indent: 10px;
+    text-indent: 7px;
 }

@@ -16,9 +16,8 @@ The "densities" from the TIFF files are then merged in all permutations of metri
 
 ## Other supporting data
 
-* [World cities](cities/)
+* [Base map with world cities](map/)
 * [CO2 emissions data for parameters](emissions/)
-* [Base map/satellite imagery](map/)
 
 1. Hobo-Dyer proj4 string: `+proj=cea +lon_0=0 +lat_ts=37.5 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs`
 2. Gastner, Michael T., and Mark EJ Newman. "Diffusion-based method for producing density-equalizing maps." Proceedings of the National Academy of Sciences 101.20 (2004): 7499-7504. Also see http://www-personal.umich.edu/~mejn/cart/
