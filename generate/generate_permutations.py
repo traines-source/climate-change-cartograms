@@ -206,6 +206,8 @@ def create_permutations(mappings):
         #else:
         #    print("Skipping", permutation_str(binaries))
     
+    resolve_buffer(buffer)
+    buffer = []
     print("Permutations", useful_permutations, "/", permutation_count)
 
 mappings = utils.read_json("emissions/mappings.json")

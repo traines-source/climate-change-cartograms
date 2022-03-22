@@ -11,15 +11,11 @@ import sys
 sys.path.append('../')
 import utils
 
+hobo = utils.HoboDyerProj(400)
+
 MAX_DIST_LEGEND = 20
 MAX_DIST_GEO = 3
 WHITE_THRESHOLD = 10
-
-def inverse_color(data):
-    for entry in data:
-        c = entry["color"]
-        entry["color"] = [c[2], c[1], c[0]]
-    return data
 
 def colorscale_legend(source, lower, upper):
     im = iio.imread(source)
@@ -29,7 +25,7 @@ def colorscale_legend(source, lower, upper):
 
 legend_frequency = colorscale_legend("working/colorscale_legend_changes.png", -0.1, 0.1)
 legend_season_length = colorscale_legend("working/colorscale_legend_changes.png", -50, 50)
-legend_ecoregions = inverse_color(utils.read_json("working/ecoregions_baseline.json"))
+legend_ecoregions = utils.read_json("working/ecoregions_baseline.json")
 
 
 def color_dist(color1, color2):
@@ -141,7 +137,7 @@ def sample_equalarea(mapfile, legend):
 
     print("Sampling map...")
 
-    p = iter(utils.HoboDyerProj())
+    p = iter(hobo)
 
     for lonlat in p:
         x = int(round(equirect.x(to_radians(lonlat[0])), 0))
@@ -180,10 +176,10 @@ def reduce_to_nearest(samples, samples_data, coords, values, value_field):
 
 datasources = [
     ("ecoregions_baseline.png", legend_ecoregions, "baseline"),
+    ("wildfire_15_frequency.png", legend_frequency, "15_freq"),
+    ("wildfire_15_season_length.png", legend_season_length, "15_slen"),
     ("wildfire_rcp26_frequency.png", legend_frequency, "rcp26_freq"),
     ("wildfire_rcp26_season_length.png", legend_season_length, "rcp26_slen"),
-    ("wildfire_rcp34_frequency.png", legend_frequency, "rcp34_freq"),
-    ("wildfire_rcp34_season_length.png", legend_season_length, "rcp34_slen"),
     ("wildfire_rcp85_frequency.png", legend_frequency, "rcp85_freq"),
     ("wildfire_rcp85_season_length.png", legend_season_length, "rcp85_slen"),
 ]
@@ -237,7 +233,7 @@ def scale_down_and_sum(summaries, max_value, scenario):
             max_value["total"] = value
     
 def write_tiff(arr, scenario):
-    p = utils.HoboDyerProj()
+    p = hobo
     print("min:", min(arr), "max:", max(arr))
     rows = []
     for i in range(len(arr)):
@@ -268,8 +264,8 @@ def write_tiffs():
 
     scenarios = [
         "baseline",
+        "15",
         "rcp26",
-        "rcp34",
         "rcp85",
     ]
     summaries = {}
