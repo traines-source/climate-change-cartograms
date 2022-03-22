@@ -146,7 +146,7 @@ function updateMap() {
 
     console.log(performance.now(), "beffetch");
 
-    fetch('data/'+permutationStr(getBinaries())+'.csv') //100ms
+    fetch('/dist/permutations/'+permutationStr(getBinaries())+'.csv') //100ms
     .then(response => {
         console.log(performance.now(), "beftext");
         const t = response.text();
@@ -212,22 +212,18 @@ function createCities(cities: any, triangles: [Vector, Vector, Vector][]): Depen
 
 function loadMappings() {
     console.log(performance.now(), "http1");
-    fetch('res/mappings.json')
+    fetch('/dist/mappings.json')
     .then(response => response.json())
     .then(json => {
         console.log(performance.now(), "res");
         mappings = json;
         createControls();
-        fetch('res/cities.json')
-        .then(response => response.json())
-        .then(cities => {
-            window.setTimeout(() => {
-                console.log(performance.now(), "faketriang");
-                const triangles = findTriangles((x, y) => new Vector(x, y));
-                crumpledMap.setTexCoords(triangles, createCities(cities, triangles)); // 600ms
-                console.log(performance.now(), "afterfaketriang");
-            }, 1);
-        });       
+        window.setTimeout(() => {
+            console.log(performance.now(), "faketriang");
+            const triangles = findTriangles((x, y) => new Vector(x, y));
+            crumpledMap.setTexCoords(triangles, createCities(json["cities"]["mapping"], triangles)); // 600ms
+            console.log(performance.now(), "afterfaketriang");
+        }, 1);      
     });
     
     console.log(performance.now(), "http2");

@@ -64,3 +64,12 @@ class HammerProj(Proj):
 
     def __init__(self):
         super().__init__(HammerProj.proj4, 1510)
+
+
+def write_json(filename, data):
+    with open(filename, 'w') as f:
+        json.dump(data, f)
+
+def read_json(filename):
+    with open(filename, 'r') as f:
+        return json.load(f)

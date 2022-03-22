@@ -10,8 +10,7 @@ echo "Running..."
 
 mkdir -p $SCRIPT_DIR/working
 #rm $SCRIPT_DIR/working/*
-#rm $SCRIPT_DIR/../data/*.csv
-cp $SCRIPT_DIR/../res/mappings.json $SCRIPT_DIR/working/
+#rm $SCRIPT_DIR/../dist/permutations/*.csv
 
 docker run -it --rm \
 -u $(id -u):$(id -g) \
@@ -23,4 +22,4 @@ docker run -it --rm \
 $DOCKER_IMAGE \
 python3 generate_permutations.py
 
-mv working/*.csv ../data/
+mv working/*.csv ../dist/permutations/

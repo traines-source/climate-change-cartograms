@@ -1,4 +1,3 @@
-import json
 import math
 import random
 import imageio as iio
@@ -7,13 +6,12 @@ import numpy.ma as ma
 import cv2
 import imageio as iio
 import os
+import sys
+sys.path.append('../')
+import utils
 
 TARGET_RESOLUTION=(400,200)
 PRESENTATION_RESOLUTION=(200,100)
-
-def read_json(filename):
-    with open(filename, 'r') as f:
-        return json.load(f)
 
 def write_png(filename, im):
     iio.imwrite(filename, np.rint(im*255).astype(np.uint8))
@@ -210,7 +208,7 @@ def create_permutations(mappings):
     
     print("Permutations", useful_permutations, "/", permutation_count)
 
-mappings = read_json("working/mappings.json")
+mappings = utils.read_json("emissions/mappings.json")
 
 print("Import densities...")
 import_densities(mappings, "metrics")

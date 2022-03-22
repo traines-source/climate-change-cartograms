@@ -1,5 +1,4 @@
 import csv
-import json
 import sys
 sys.path.append('../')
 import utils
@@ -25,10 +24,6 @@ def to_json(cities):
             "population": city['population']
         } for city in cities
     ]
-
-def write_json(filename, data):
-    with open(filename, 'w') as f:
-        json.dump(data, f)
 
 def get_int(s):
     try:
@@ -64,7 +59,12 @@ for city in cities:
         if i >= CITY_COUNT:
             break
 
-write_json('working/cities.json', to_json(selected_cites))
+cities_json = to_json(selected_cites)
+utils.write_json('working/cities.json', cities_json)
+
+mappings = utils.read_json('../emissions/mappings.json')
+mappings['cities'] = {'mapping': cities_json}
+utils.write_json('working/mappings.json', mappings)
 
 with open("working/imagemagick_cities_cmd.txt", "w") as f:
     f.write(imagemagick_cities_cmd)

@@ -8,7 +8,7 @@ echo "Building image..."
 DOCKER_IMAGE=$(cat ../Dockerfile | docker build -q -)
 echo "Running..."
 
-mkdir -p $SCRIPT_DIR/working
+mkdir -p $SCRIPT_DIR/wildfires/working
 
 docker run -it --rm \
 -e SCRIPT_DIR=${SCRIPT_DIR} \

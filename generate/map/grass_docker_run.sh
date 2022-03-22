@@ -19,5 +19,5 @@ docker run -it --rm \
 $DOCKER_IMAGE \
 bash ${SCRIPT_DIR}/map/grass_run.sh
 
-mv working/map*.jpg ../../res/
-mv working/*.json ../../res/
+mv working/map*.jpg ../../dist/
+mv working/mappings.json ../../dist/

@@ -85,7 +85,7 @@ export class CrumpledImage {
         im.onload = () => {
             this.glTexture(im);
         }
-        im.src = "res/map_"+this.getPreferredImgResolution()+"x.jpg";  
+        im.src = "/dist/map_"+this.getPreferredImgResolution()+"x.jpg";  
         console.log(performance.now(), "cru3"); 
     }
 

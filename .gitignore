@@ -4,4 +4,4 @@ node_modules
 __pycache__
 cart
 *.ign.*
-data
+dist

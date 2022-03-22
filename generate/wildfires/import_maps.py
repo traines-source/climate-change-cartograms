@@ -15,14 +15,6 @@ MAX_DIST_LEGEND = 20
 MAX_DIST_GEO = 3
 WHITE_THRESHOLD = 10
 
-def read_json(filename):
-    with open(filename, 'r') as f:
-        return json.load(f)
-
-def write_json(filename, data):
-    with open(filename, 'w') as f:
-        json.dump(data, f)
-
 def inverse_color(data):
     for entry in data:
         c = entry["color"]
@@ -37,7 +29,7 @@ def colorscale_legend(source, lower, upper):
 
 legend_frequency = colorscale_legend("working/colorscale_legend_changes.png", -0.1, 0.1)
 legend_season_length = colorscale_legend("working/colorscale_legend_changes.png", -50, 50)
-legend_ecoregions = inverse_color(read_json("working/ecoregions_baseline.json"))
+legend_ecoregions = inverse_color(utils.read_json("working/ecoregions_baseline.json"))
 
 
 def color_dist(color1, color2):
@@ -135,7 +127,7 @@ def digitize_map(mapfile, legend):
                 values.append(sample[2])
     
     print(len(values))
-    write_json(mapfile + ".cache.json", (coords, values))
+    utils.write_json(mapfile + ".cache.json", (coords, values))
     return (coords, values)
 
 
@@ -208,13 +200,13 @@ def digitize(from_cache=True):
         if not from_cache:
             coords, values = digitize_map("working/"+source[0], source[1])
         else:
-            coords, values = read_json("working/"+source[0]+".cache.json")
+            coords, values = utils.read_json("working/"+source[0]+".cache.json")
 
         samples, samples_data = reduce_to_nearest(samples, samples_data, coords, values, source[2])
 
     print("Writing geojson...")
     geojson = to_geojson(samples, samples_data)
-    write_json("wildfires.geojson", geojson)
+    utils.write_json("wildfires.geojson", geojson)
 
 
 
@@ -271,7 +263,7 @@ def write_tiff(arr, scenario):
     iio.imwrite("out/wildfires_"+scenario+".png", np.rint(im*255).astype(np.uint8))
 
 def write_tiffs():
-    samples_data = read_json("wildfires.geojson")    
+    samples_data = utils.read_json("wildfires.geojson")    
     samples = [sample["properties"] for sample in samples_data["features"]]
 
     scenarios = [
