@@ -98,6 +98,58 @@ export class CrumpledImage {
         this.internalUpdate(newStateCanvas, animate);
     }
 
+    async streamUpdate(newState: ReadableStream<Uint8Array>, animate: boolean) {
+        const utf8Decoder = new TextDecoder("utf-8");
+        const reader = newState.getReader();
+        const re = /\n| /gm;
+        const width = (this.gridDimen.x+1)*2;
+        const scaleX = 2/this.gridDimen.x;
+        const scaleY = -2/this.gridDimen.y;
+
+        const triangles: number[] = [];
+        
+        let char = 0;
+        let index = 0;
+        let remainder = '';
+        let lastLine: number[] = new Array(width);
+        let currLine: number[] = new Array(width);
+        
+        const pump = async () => {
+            const { done, value } = await reader.read();
+            const chunk = remainder + (value ? utf8Decoder.decode(value, { stream: true }) : "");
+            while (true) {
+                let result = re.exec(chunk);
+                if (!result) {
+                    remainder = chunk.substring(char);
+                    char = 0;
+                    re.lastIndex = 0;
+                    break;
+                }
+                const x = index%width;
+                if (x == 0 && index > 0) {
+                    const tmp = lastLine;
+                    lastLine = currLine;
+                    currLine = tmp;
+                }
+                const xOrYValue = parseFloat(chunk.substring(char, result.index));
+                currLine[x] = x%2 == 0 ? xOrYValue*scaleX-1 : xOrYValue*scaleY+1;
+                if (x % 2 == 1 && x >= 3 && index > width) {
+                    triangles.push(lastLine[x-3], lastLine[x-2], lastLine[x-1], lastLine[x-0], currLine[x-3], currLine[x-2]);
+                    triangles.push(currLine[x-1], currLine[x-0], lastLine[x-1], lastLine[x-0], currLine[x-3], currLine[x-2]);
+                }
+                index++;
+                char = re.lastIndex;
+            }
+            return !done;
+        }
+        let bytesRemaining = true;
+        while (bytesRemaining) {
+            bytesRemaining = await pump();
+        }
+
+        this.internalUpdate(triangles, animate);
+    }
+
     private internalUpdate(newState: number[], animate: boolean) {
         this.mapTriangles(newState);
         this.dependentsUpdateTo(newState);

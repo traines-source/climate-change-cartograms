@@ -153,13 +153,19 @@ function updateMap() {
 
     fetch('/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv') //100ms
     .then(response => {
+        if (response.body != null) {
+            crumpledMap.streamUpdate(response.body, !initial);
+            initial = false;
+        } else {
+            console.log("Response was null");
+        }
         console.log(performance.now(), "beftext");
-        const t = response.text(); //500ms-1000ms in promise 
+        //const t = response.text(); //500ms-1000ms in promise 
         console.log(performance.now(), "afztext");
-        return t;
+        //return t;
 
     })
-    .then(grid => readGrid(grid));
+    //.then(grid => readGrid(grid));
 }
 
 function cumulateCo2Emissions() {
