@@ -5,6 +5,7 @@ const GRID_DIMEN = new Vector(600, 300);
 
 let mappings: MappingCollection | undefined = undefined;
 let initial = true;
+let selectedBinary: string = '2100';
 
 interface Label { [id: string]: string }
 interface Mapping {
@@ -106,10 +107,18 @@ function toggleParameterCheckboxes(disabled: boolean) {
     mappings.parameters.mapping.map(param => (<HTMLInputElement>document.getElementById(param.id)).disabled = disabled);
 }
 
-function updateMap() {
+function updateMap(evt?: Event) {
     console.log(performance.now(), "update triggered")
     if (mappings == undefined) {
         return;
+    }
+    if (evt != undefined) {
+        const id = (<HTMLInputElement>evt?.target).id;
+        (<HTMLInputElement>document.getElementById(selectedBinary)).style.display = 'none';
+        if (isChecked(id)) {
+            (<HTMLInputElement>document.getElementById(id+'_description')).style.display = 'block';
+        }
+        selectedBinary = id+'_description';
     }
     const todayMode = !isChecked(mappings.year.mapping[0].id);
     const anyImpact = mappings.impacts.mapping.map(impact => isChecked(impact.id)).reduce((a, b) => a || b);

@@ -15,6 +15,14 @@ env = jinja2.Environment(
     loader=jinja2.FileSystemLoader('./')
 )
 
+mappings = utils.read_json("../emissions/mappings.json")
+
+binaries = []
+binaries.extend(mappings["year"]["mapping"])
+binaries.extend(mappings["parameters"]["mapping"])
+binaries.extend(mappings["metrics"]["mapping"])
+binaries.extend(mappings["impacts"]["mapping"])
+
 locales = ["en", "de"]
 for locale in locales:
     print(locale)
@@ -23,7 +31,7 @@ for locale in locales:
     env.install_gettext_translations(tr, newstyle=True)
 
     tm = env.get_template('index.tmpl.html')
-    html = tm.render(mappings=utils.read_json("../emissions/mappings.json"), credits=credits_html)
+    html = tm.render(mappings=mappings, binaries=binaries, credits=credits_html)
    
     Path("working/"+locale).mkdir(parents=True, exist_ok=True)
     with open("working/"+locale+"/index.html", "w") as outf:

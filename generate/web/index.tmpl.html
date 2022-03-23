@@ -33,8 +33,16 @@
         </div>
 
         <div class="descriptions"><div>
+            {% for item in binaries %}
+            <div id="{{ item.id }}_description" class="binary-description">
+                <h3>{{ gettext(item.id) }}</h3>
+                <p>{{ gettext(item.id+'_description') }}</p>
+            </div>
+            {% endfor %}
+            <h3>{{ gettext('about_title') }}</h3>
             <p class="about">{{ gettext('about') }}</p>
             <p>{{ gettext('disclaimer') }}</p>
+            <h3>{{ gettext('credits_title') }}</h3>
             <p>{{ gettext('credits') }} <a href="https://github.com/traines-source/climate-change-cartograms">https://github.com/traines-source/climate-change-cartograms</a></p>
             {{ credits }}
         </div></div>

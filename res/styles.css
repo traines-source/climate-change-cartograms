@@ -98,7 +98,7 @@ body {
     background-color: #004D40;   
 }
 .controls input:disabled+label {
-    background-color: #dbdbdb;
+    background-color: #ebebeb;
     cursor: default;
 }
 .controls label.toggle {
@@ -136,6 +136,13 @@ body {
 .descriptions > div {
     max-width: 900px;
     margin: 12px auto;
+}
+
+.binary-description {
+    background-color: #ebebeb;
+    border-radius: 8px;
+    display: none;
+    padding: 12px 24px;
 }
 
 #footer {

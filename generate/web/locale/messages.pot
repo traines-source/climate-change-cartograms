@@ -59,10 +59,43 @@ msgstr ""
 msgid "wbgt"
 msgstr ""
 
+msgid "2100_description"
+msgstr ""
+
+msgid "coalplants_description"
+msgstr ""
+
+msgid "industry_description"
+msgstr ""
+
+msgid "roadtraffic_description"
+msgstr ""
+
+msgid "buildings_description"
+msgstr ""
+
+msgid "population_description"
+msgstr ""
+
+msgid "wildfires_description"
+msgstr ""
+
+msgid "sealevel_description"
+msgstr ""
+
+msgid "wbgt_description"
+msgstr ""
+
+msgid "about_title"
+msgstr ""
+
 msgid "about"
 msgstr ""
 
 msgid "disclaimer"
+msgstr ""
+
+msgid "credits_title"
 msgstr ""
 
 msgid "credits"
