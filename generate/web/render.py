@@ -1,6 +1,7 @@
 import jinja2
 import gettext
 import markdown
+from pathlib import Path
 import sys
 sys.path.append('../')
 import utils
@@ -23,5 +24,7 @@ for locale in locales:
 
     tm = env.get_template('index.tmpl.html')
     html = tm.render(mappings=utils.read_json("../emissions/mappings.json"), credits=credits_html)
-    with open("working/index."+locale+".html", "w") as outf:
+   
+    Path("working/"+locale).mkdir(parents=True, exist_ok=True)
+    with open("working/"+locale+"/index.html", "w") as outf:
         outf.write(html)

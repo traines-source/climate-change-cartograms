@@ -20,4 +20,5 @@ docker run -it --rm \
 $DOCKER_IMAGE \
 bash render.sh
 
-mv working/*.html ../../dist/www/
+rm -r ../../dist/www/*/
+mv working/* ../../dist/www/

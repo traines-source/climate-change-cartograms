@@ -2,6 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <link rel="alternate" href="/en/" hreflang="en" />
+    <link rel="alternate" href="/de/" hreflang="de" />
     <title>Climate Change Cartograms</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=3,user-scalable=yes">
     <link href="/res/styles.css" type="text/css" rel="stylesheet">
@@ -34,10 +36,13 @@
             <p class="about">{{ gettext('about') }}</p>
             <p>{{ gettext('disclaimer') }}</p>
             <p>{{ gettext('credits') }} <a href="https://github.com/traines-source/climate-change-cartograms">https://github.com/traines-source/climate-change-cartograms</a></p>
-            <p>{{ credits }}</p>
+            {{ credits }}
         </div></div>
     </div>
 
+    <div id="footer">
+        <a href="/en/" hreflang="en">EN</a> | <a href="/de/" hreflang="de">DE</a> | <a href="https://traines.eu/impressum.html">{{ gettext('imprint') }}</a>
+    </div>
     <script src="/dist/climate-change-cartograms.js"></script>
     
 </body>

@@ -67,3 +67,6 @@ msgstr ""
 
 msgid "credits"
 msgstr ""
+
+msgid "imprint"
+msgstr ""
