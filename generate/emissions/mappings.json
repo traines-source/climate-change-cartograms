@@ -22,18 +22,10 @@
             {
                 "id": "coalplants",
                 "label": {
-                    "en": "Shut down coal plants"
+                    "en": "Shut down coal and gas plants"
                 },
-                "x": 26,
-                "y": -354
-            },
-            {
-                "id": "gasplants",
-                "label": {
-                    "en": "Shut down gas plants"
-                },
-                "x": 8,
-                "y": -91
+                "x": 34,
+                "y": -445
             },
             {
                 "id": "industry",
@@ -108,7 +100,7 @@
             {
                 "id": "sealevel",
                 "label": {
-                    "en": "Sealevel rising"
+                    "en": "Sealevel rise"
                 }
             },
             {

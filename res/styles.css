@@ -9,23 +9,7 @@ body {
     padding: 0;
     font-family: 'Roboto Condensed', sans-serif;
     font-weight: 400;
-}
-
-.controls {
-    position: absolute;
-    z-index: 100;
-    bottom: 60px;
-    left: 8px;
-    padding: 12px;
-    border-radius: 8px;
-
-    background-color: rgba(255, 255, 255, 0.9);
-}
-.controls label {
-    margin-left: 5px;
-}
-.temperature {
-    font-weight: bold;
+    font-size: 16px;
 }
 
 #container {
@@ -42,10 +26,95 @@ body {
     font-size: 0.7vmax;
     position: absolute;
     display: block;
-    margin: -2.5px 0 0 -2.5px;
+    margin: -0.1vmax 0 0 -0.1vmax;
     color: white;
     text-shadow: 1px 1px 2px black;
     white-space: nowrap;
-    line-height: 5px;
-    text-indent: 7px;
+    line-height: 0.2vmax;
+    text-indent: 0.4vmax;
+}
+
+#page {
+    position: relative;
+    top: -450px;
+    left: 0px;
+}
+.controls, .descriptions {
+    background-color: rgba(255, 255, 255, 1);
+}
+.controls {
+    display: inline-block;
+    z-index: 100;
+    padding: 12px;
+    border-radius: 8px 8px 0 0;
+}
+.controls .title {
+    text-transform: uppercase;
+    font-size: 14px;
+    padding-top: 5px;
+}
+.controls input {
+    display: none;
+}
+.controls label {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    padding: 0 5px;
+    line-height: 24px;
+    margin: 5px 0;
+    border-radius: 8px;
+    background-color: #757575;
+    color: white;
+}
+.controls input:checked+label {
+    background-color: #004D40;   
+}
+.controls label.toggle {
+    padding: 0;
+    overflow: hidden;
+}
+.controls label.toggle span {
+    display: inline-block;
+    width: 50%;
+    height: 100%;
+}
+.controls label.toggle span.off {
+    background-color: #004D40;
+}
+.controls input:checked+label.toggle span.off {
+    background-color: #757575;   
+}
+.temperature {
+    font-weight: bold;
+    padding-bottom: 5px;
+}
+
+.descriptions {
+    padding: 24px 12px;
+    border-radius: 0 8px 0 0;
+}
+
+.descriptions > div {
+    max-width: 900px;
+    margin: 12px auto;
+}
+
+@media only screen and (max-width : 1500px) {
+    #page {
+        top: -3vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px 8px 0 0;
+        background-color: rgba(255, 255, 255, 1);
+    }
+    .controls {
+        position: static;
+        margin: 0 auto;
+        background-color: transparent;
+        padding-top: 24px;
+    }
 }

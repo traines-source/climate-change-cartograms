@@ -102,24 +102,8 @@ function createControls() {
         throw new Error("Can't populate controls")
 
     const binaries = getBinaries();
-    console.log(binaries);
-
     for (let i=0; i<binaries.length; i++) {
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.name = binaries[i].id;
-        checkbox.id = binaries[i].id;
-        checkbox.oninput = updateMap;
-
-        const label = document.createElement('label');
-        label.htmlFor = binaries[i].id;
-        label.innerHTML = binaries[i].label.en;
-
-        const div = document.createElement('div');
-        div.appendChild(checkbox);
-        div.appendChild(label);
-        controls.appendChild(div);
-        console.log(binaries[i].id);
+        (<HTMLInputElement>document.getElementById(binaries[i].id)).oninput = updateMap
     }
     updateMap();
 }

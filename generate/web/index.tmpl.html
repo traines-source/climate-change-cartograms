@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Climate Change Cartograms</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=3,user-scalable=yes">
+    <link href="/res/styles.css" type="text/css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="container"><canvas id="map"></canvas></div>
+
+    <div id="page">
+        <div class="controls" id="controls">
+            <div class="temperature">{{ gettext('temperature') }}: <span id="temperature"></span> °C</div>
+            {% for item in mappings.year.mapping %}
+            <div><input type="checkbox" name="{{ item.id }}" id="{{ item.id }}"><label for="{{ item.id }}" class="toggle"><span class="off">{{ gettext('today') }}</span><span class="on">{{ gettext('2100') }}</span></label></div>
+            {% endfor %}
+            <div class="title">{{ gettext('parameters') }}</div>
+            {% for item in mappings.parameters.mapping %}
+            <div><input type="checkbox" name="{{ item.id }}" id="{{ item.id }}"><label for="{{ item.id }}">{{ gettext(item.id) }}</label></div>
+            {% endfor %}
+            <div class="title">{{ gettext('metrics') }}</div>
+            {% for item in mappings.metrics.mapping %}
+            <div><input type="checkbox" name="{{ item.id }}" id="{{ item.id }}"><label for="{{ item.id }}">{{ gettext(item.id) }}</label></div>
+            {% endfor %}
+            <div class="title">{{ gettext('impacts') }}</div>
+            {% for item in mappings.impacts.mapping %}
+            <div><input type="checkbox" name="{{ item.id }}" id="{{ item.id }}"><label for="{{ item.id }}">{{ gettext(item.id) }}</label></div>
+            {% endfor %}
+        </div>
+
+        <div class="descriptions"><div>
+            <p class="about">{{ gettext('about') }}</p>
+            <p>{{ gettext('disclaimer') }}</p>
+            <p>{{ gettext('credits') }} <a href="https://github.com/traines-source/climate-change-cartograms">https://github.com/traines-source/climate-change-cartograms</a></p>
+            <p>{{ credits }}</p>
+        </div></div>
+    </div>
+
+    <script src="/dist/climate-change-cartograms.js"></script>
+    
+</body>
+</html>
