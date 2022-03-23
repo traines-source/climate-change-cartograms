@@ -2,9 +2,9 @@ const path = require('path');
 const LicensePlugin = require('webpack-license-plugin')
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   entry: './src/main.ts',
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   module: {
     rules: [
       {

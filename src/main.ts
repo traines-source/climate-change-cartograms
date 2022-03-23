@@ -34,15 +34,15 @@ function findTriangles(resolver: (x: number, y: number) => Vector) {
 }
 
 function readGrid(grid: string) {
-    console.log(performance.now(), "befread"); //500ms
-    const rows = grid.split("\n")
+    console.log(performance.now(), "befread");
+    const rows = grid.split("\n") //30ms
     console.log(performance.now(), "befread1");
     rows.pop();
     console.log(performance.now(), "befread2"); 
 
-    const numbers: number[][] = rows.map(row => row.split(" ").map(parseFloat));
+    const numbers: number[][] = rows.map(row => row.split(" ").map(parseFloat)); //200ms
     console.log(performance.now(), "befread3"); 
-    const vectors: Vector[] = numbers.map(row => Vector.fromArray(row));
+    const vectors: Vector[] = numbers.map(row => Vector.fromArray(row)); //100ms
     console.log(performance.now(), "befread4"); 
 
 
@@ -54,7 +54,7 @@ function readGrid(grid: string) {
         return new Vector(v.x, v.y);
     }
     console.log(performance.now(), "beftriangles");
-    const triangles = findTriangles(resolver); //600ms
+    const triangles = findTriangles(resolver); //200ms
     console.log(performance.now(), "hey");
 
     crumpledMap.update(triangles, !initial);
@@ -154,7 +154,7 @@ function updateMap() {
     fetch('/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv') //100ms
     .then(response => {
         console.log(performance.now(), "beftext");
-        const t = response.text();
+        const t = response.text(); //500ms-1000ms in promise 
         console.log(performance.now(), "afztext");
         return t;
 

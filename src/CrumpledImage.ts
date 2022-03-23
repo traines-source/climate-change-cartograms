@@ -226,6 +226,8 @@ export class CrumpledImage {
             }
         };
         this.gl.useProgram(this.programInfo.program);
+        //this.gl.enable(this.gl.CULL_FACE);
+        //this.gl.cullFace(this.gl.FRONT);
 
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
         
