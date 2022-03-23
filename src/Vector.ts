@@ -34,8 +34,12 @@ export class Vector {
         return this.add(delta.withLength(delta.length*x));
     }
 
-    barycentricCoordinates(triangle: [Vector, Vector, Vector]): [number, number, number]
-    {
+    private static toTriangle(state: number[], i: number): [Vector, Vector, Vector] {
+        return [new Vector(state[i*6], state[i*6+1]), new Vector(state[i*6+2], state[i*6+3]), new Vector(state[i*6+4], state[i*6+5])];
+    }
+
+    barycentricCoordinates(triangles: number[], index: number): [number, number, number] {
+        const triangle = Vector.toTriangle(triangles, index);
         const v0 = triangle[0].delta(triangle[1])
         const v1 = triangle[0].delta(triangle[2])
         const v2 = triangle[0].delta(this);
@@ -46,7 +50,8 @@ export class Vector {
         return [u, v, w];
     }
 
-    static euclidianCoordinates(triangle: [Vector, Vector, Vector], barycentric: [number, number, number]): Vector {
+    static euclidianCoordinates(triangles: number[], index: number, barycentric: [number, number, number]): Vector {
+        const triangle = this.toTriangle(triangles, index);
         let r = new Vector(0, 0);
         for (let i=0; i<3; i++) {
             r = r.add(triangle[i].times(barycentric[i]));

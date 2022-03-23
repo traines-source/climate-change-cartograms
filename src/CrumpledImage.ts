@@ -19,41 +19,29 @@ export class CrumpledImage {
     private dependents: Dependent[] = [];
 
     constructor(private gridDimen: Vector, private animationDurationMs: number) {
-        console.log(performance.now(), "cru1");
         this.canvas = <HTMLCanvasElement>document.getElementById('map');
         this.gl = <WebGLRenderingContext>this.canvas.getContext('webgl');
         this.pixelRatio = window.devicePixelRatio;  
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas(), false);
         this.glSetup();
-        console.log(performance.now(), "cru2");
         this.setTexture();                     
     }
 
-    setTexCoords(srcTriangles: [Vector, Vector, Vector][], dependents: Dependent[]) {
-        const newStateCanvas = this.matrixConvertCoords(srcTriangles); //200ms
-        
-        this.setInternalTexCoords(newStateCanvas, dependents);
-    }
-    private setInternalTexCoords(srcTriangles: number[], dependents: Dependent[]) {
+    setTexCoords(srcTriangles: number[], dependents: Dependent[]) {
         this.dependents = dependents;
         this.dependentsUpdateFrom(srcTriangles);
         this.dependentsUpdateTo(srcTriangles);
         this.dependentsInterpolate(0);
         this.vertexCount = srcTriangles.length / 2;
-        console.log(performance.now(), "befsrc");
-        const texCoords = this.canvas2ImgCoords(srcTriangles); // 100ms
-        console.log(performance.now(), "befsetip");
+        const texCoords = this.canvas2ImgCoords(srcTriangles);
         this.glUpdateFrom(srcTriangles);
-        this.glTexCoords(texCoords);
-    
-        console.log(performance.now(), "aftersetup");
-        
+        this.glTexCoords(texCoords);        
     }
 
     private resizeCanvas() {
         if (window.devicePixelRatio == this.pixelRatio) {
-            console.log("resize")
+            console.log("resize triggered")
             const w = document.documentElement.clientWidth || document.body.clientWidth;
             const h = w*this.gridDimen.y/this.gridDimen.x;
             const ratio = window.devicePixelRatio || 1;
@@ -88,14 +76,7 @@ export class CrumpledImage {
         im.onload = () => {
             this.glTexture(im);
         }
-        im.src = "/dist/map_"+this.getPreferredImgResolution()+"x.jpg";  
-        console.log(performance.now(), "cru3"); 
-    }
-
-    update(newState: [Vector, Vector, Vector][], animate: boolean) {
-        console.log(performance.now(), "received update");
-        const newStateCanvas = this.matrixConvertCoords(newState); //200ms
-        this.internalUpdate(newStateCanvas, animate);
+        im.src = "/dist/map_"+this.getPreferredImgResolution()+"x.jpg"; 
     }
 
     async streamUpdate(newState: ReadableStream<Uint8Array>, animate: boolean) {
@@ -161,39 +142,35 @@ export class CrumpledImage {
             return;
         }
         const animator = new Animator();
+        console.log(performance.now(), "started update");
         
         const nonce = this.nonce;
         animator.animate(this.animationDurationMs, (x, isLast) => {
             if (this.nonce != nonce) {
                 return false;
             }
-            const s = performance.now();
-            console.log(performance.now(), "started update");
+            
             this.glInterpolate(x);
             this.dependentsInterpolate(x);
             
             if (isLast) {
                 this.glUpdateFrom(newState);
                 this.dependentsUpdateFrom(newState);
-                console.log(performance.now(), "applied update", performance.now()-s);
+                console.log(performance.now(), "applied update");
             }
             return true;
         });       
     }
 
-    private toTriangle(state: number[], i: number): [Vector, Vector, Vector] {
-        return [new Vector(state[i*6], state[i*6+1]), new Vector(state[i*6+2], state[i*6+3]), new Vector(state[i*6+4], state[i*6+5])];
-    }
-
     private dependentsUpdateFrom(newState: number[]) {
         for (const dependent of this.dependents) {
-            dependent.from = Vector.euclidianCoordinates(this.toTriangle(newState, dependent.triangleIndex), dependent.barycentric);
+            dependent.from = Vector.euclidianCoordinates(newState, dependent.triangleIndex, dependent.barycentric);
         }
     }
 
     private dependentsUpdateTo(newState: number[]) {
         for (const dependent of this.dependents) {
-            dependent.to = Vector.euclidianCoordinates(this.toTriangle(newState, dependent.triangleIndex), dependent.barycentric);
+            dependent.to = Vector.euclidianCoordinates(newState, dependent.triangleIndex, dependent.barycentric);
         }
     }    
 
@@ -211,10 +188,6 @@ export class CrumpledImage {
             console.warn("newState has different length ("+newState.length/2+") than currentState ("+this.vertexCount+")");
             return;
         }
-        console.log(performance.now(), "befdst");
-        
-      
-        console.log(performance.now(), "befupd");
         this.glUpdateTo(newState);
     }
     
@@ -226,25 +199,6 @@ export class CrumpledImage {
         return coords;
     }
 
-    private grid2ImgCoords(v: Vector) {
-        const scale = 1 / this.gridDimen.x;
-        return new Vector(v.x*scale, v.y*1/this.gridDimen.y);
-    }
-    
-    private grid2CanvasCoords(v: Vector) {
-        const scale = 2 / this.gridDimen.x;
-        return new Vector(v.x*scale-1, v.y*-2/this.gridDimen.y+1);
-    }
-
-    private matrixConvertCoords(matrix: [Vector, Vector, Vector][], mapping: (v: Vector) => Vector = (v) => this.grid2CanvasCoords(v)) {
-        const coords: number[] = [];
-        for (let i=0;i<matrix.length;i++) {
-            const dst = matrix[i].map((c: Vector) => mapping(c));
-            coords.push(dst[0].x, dst[0].y, dst[1].x, dst[1].y, dst[2].x, dst[2].y);
-        }
-        return coords;
-    }
-    
     private glSetup() {
         const fsSource = `
             varying highp vec2 vTextureCoord;
@@ -321,7 +275,7 @@ export class CrumpledImage {
         const texName = this.gl.createTexture();
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, texName);
-        console.log(performance.now(), this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE), im.width, im.height, this.gl.canvas.height);
+        console.log(performance.now(), "stats:", this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE), im.width, im.height, this.gl.canvas.height);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, im);
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
        
@@ -330,41 +284,27 @@ export class CrumpledImage {
     }
 
     private glUpdateFrom(fromCoords: number[]) {
-        console.log(performance.now(), "befbuffer");
-
-        console.log(performance.now(), "befbind");
-
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.programInfo.buffers.vertexBufferFrom);
-        console.log(performance.now(), "befdata");
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(fromCoords), this.gl.STATIC_DRAW);        
-        console.log(performance.now(), "befattrib");
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(fromCoords), this.gl.STATIC_DRAW);
 
         this.gl.vertexAttribPointer( this.programInfo.attribLocations.vertexPositionFrom, 2, this.gl.FLOAT, false, 0, 0 );
         this.gl.enableVertexAttribArray( this.programInfo.attribLocations.vertexPositionFrom );
 
         //this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        //this.gl.clear(this.gl.COLOR_BUFFER_BIT);          
-        console.log(performance.now(), "befdraw");
-
+        //this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         this.programInfo.loaded.dstCoord = true;
         //this.gl.drawArrays(this.gl.TRIANGLES, 0, fromCoords.length / 2);
     }
 
     private glUpdateTo(toCoords: number[]) {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.programInfo.buffers.vertexBufferTo);
-        console.log(performance.now(), "befdata");
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(toCoords), this.gl.STATIC_DRAW);        
-        console.log(performance.now(), "befattrib");
-
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(toCoords), this.gl.STATIC_DRAW);
+    
         this.gl.vertexAttribPointer( this.programInfo.attribLocations.vertexPositionTo, 2, this.gl.FLOAT, false, 0, 0 );
         this.gl.enableVertexAttribArray( this.programInfo.attribLocations.vertexPositionTo );
-        console.log(performance.now(), "befclear");
-      
 
         //this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        //this.gl.clear(this.gl.COLOR_BUFFER_BIT);          
-        console.log(performance.now(), "befdraw");
-
+        //this.gl.clear(this.gl.COLOR_BUFFER_BIT);     
         //this.gl.drawArrays(this.gl.TRIANGLES, 0, fromCoords.length / 2);
     }
 

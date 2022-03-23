@@ -7,7 +7,7 @@ export class Animator {
     private _from: number = 0;
     private _to: number = 1;
     private _timePassed: number = 0;
-    private _ease: (x: number) => number = Animator.EASE_NONE;
+    private _ease: (x: number) => number = Animator.EASE_SINE;
 
     private callback: (x: number, isLast: boolean) => boolean = x => true;
     private startTime: number = 0;

@@ -22,43 +22,18 @@ interface MappingCollection {
 
 const crumpledMap = new CrumpledImage(GRID_DIMEN, 2000);
 
-function findTriangles(resolver: (x: number, y: number) => Vector) {
-    const triangles: [Vector, Vector, Vector][] = []
-    for (let i=0;i<GRID_DIMEN.y; i+=1) {
-        for (let j=0;j<GRID_DIMEN.x; j+=1) {
-            triangles.push([resolver(j, i), resolver(j+1, i), resolver(j, i+1)]);
-            triangles.push([resolver(j+1, i+1), resolver(j+1, i), resolver(j, i+1)]);
+const sX = 2/GRID_DIMEN.x;
+const sY = (-2)/GRID_DIMEN.y;
+
+function findTriangles() {
+    const triangles: number[] = [];
+    for (let y=0;y<GRID_DIMEN.y; y+=1) {
+        for (let x=0;x<GRID_DIMEN.x; x+=1) {
+            triangles.push(sX*(x)-1, sY*(y)+1, sX*(x+1)-1, sY*(y)+1, sX*(x)-1, sY*(y+1)+1);
+            triangles.push(sX*(x+1)-1, sY*(y+1)+1, sX*(x+1)-1, sY*(y)+1, sX*(x)-1, sY*(y+1)+1);
         }
     }
     return triangles;
-}
-
-function readGrid(grid: string) {
-    console.log(performance.now(), "befread");
-    const rows = grid.split("\n") //30ms
-    console.log(performance.now(), "befread1");
-    rows.pop();
-    console.log(performance.now(), "befread2"); 
-
-    const numbers: number[][] = rows.map(row => row.split(" ").map(parseFloat)); //200ms
-    console.log(performance.now(), "befread3"); 
-    const vectors: Vector[] = numbers.map(row => Vector.fromArray(row)); //100ms
-    console.log(performance.now(), "befread4"); 
-
-
-    const resolver = (x: number, y: number) => {
-        const v = vectors[y*(GRID_DIMEN.x+1)+x];
-        if (v == undefined) {
-            console.log("hey", x, y);
-        }
-        return new Vector(v.x, v.y);
-    }
-    console.log(performance.now(), "beftriangles");
-    const triangles = findTriangles(resolver); //200ms
-    console.log(performance.now(), "hey");
-
-    crumpledMap.update(triangles, !initial);
-    initial = false;
 }
 
 function interpolateMapping(mappings: Mapping[], x: number): number {
@@ -103,7 +78,7 @@ function createControls() {
 
     const binaries = getBinaries();    
     for (let i=0; i<binaries.length; i++) {
-        (<HTMLInputElement>document.getElementById(binaries[i].id)).oninput = updateMap
+        (<HTMLInputElement>document.getElementById(binaries[i].id)).oninput = updateMap;
     }
     updateMap();
 }
@@ -128,12 +103,11 @@ function toggleParameterCheckboxes(disabled: boolean) {
     if (mappings == undefined) {
         return;
     }
-    console.log("dis", disabled, mappings.impacts.mapping.map(impact => isChecked(impact.id)));
     mappings.parameters.mapping.map(param => (<HTMLInputElement>document.getElementById(param.id)).disabled = disabled);
 }
 
 function updateMap() {
-    console.log(performance.now(), "upd trig")
+    console.log(performance.now(), "update triggered")
     if (mappings == undefined) {
         return;
     }
@@ -149,23 +123,15 @@ function updateMap() {
     console.log('Temperature forecast:', temperature);
     updateTemperature(temperature);
 
-    console.log(performance.now(), "beffetch");
-
-    fetch('/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv') //100ms
+    fetch('/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv')
     .then(response => {
         if (response.body != null) {
-            crumpledMap.streamUpdate(response.body, !initial);
+            crumpledMap.streamUpdate(response.body, true);
             initial = false;
         } else {
             console.log("Response was null");
         }
-        console.log(performance.now(), "beftext");
-        //const t = response.text(); //500ms-1000ms in promise 
-        console.log(performance.now(), "afztext");
-        //return t;
-
-    })
-    //.then(grid => readGrid(grid));
+    });
 }
 
 function cumulateCo2Emissions() {
@@ -192,7 +158,7 @@ function v(p: number, q: number, t: number) {
     return p*(1-t)+q*t;
 }
 
-function createCities(cities: any, triangles: [Vector, Vector, Vector][]): Dependent[] {
+function createCities(cities: any, triangles: number[]): Dependent[] {
     const dependents: Dependent[] = [];
     const container = document.getElementById('container');
     for (let i=0; i<cities.length; i++) {
@@ -206,9 +172,7 @@ function createCities(cities: any, triangles: [Vector, Vector, Vector][]): Depen
         const evenIndex = (Math.floor(x)+Math.floor(y)*(GRID_DIMEN.x))*2;
         const uneven = x-Math.floor(x)+y-Math.floor(y) > 1 ? 1 : 0;
         const index = evenIndex + uneven;
-        console.log(city['name'], index, index%((GRID_DIMEN.x)*2), triangles[index]);
-        const barycentric = (new Vector(x, y)).barycentricCoordinates(triangles[index]);
-        console.log(x, y, barycentric, Vector.euclidianCoordinates(triangles[index], barycentric));
+        const barycentric = (new Vector(sX*x-1, sY*y+1)).barycentricCoordinates(triangles, index);
         dependents.push({
             callback: (gridPos: Vector) => {
                 c.style.left = (gridPos.x/2*100+50)+'%';
@@ -222,22 +186,16 @@ function createCities(cities: any, triangles: [Vector, Vector, Vector][]): Depen
 }
 
 function loadMappings() {
-    console.log(performance.now(), "http1");
     fetch('/dist/mappings.json')
     .then(response => response.json())
     .then(json => {
-        console.log(performance.now(), "res");
         mappings = json;
         createControls();
         window.setTimeout(() => {
-            console.log(performance.now(), "faketriang");
-            const triangles = findTriangles((x, y) => new Vector(x, y));
-            crumpledMap.setTexCoords(triangles, createCities(json["cities"]["mapping"], triangles)); // 600ms
-            console.log(performance.now(), "afterfaketriang");
+            const triangles = findTriangles();
+            crumpledMap.setTexCoords(triangles, createCities(json["cities"]["mapping"], triangles));
         }, 1);      
     });
-    
-    console.log(performance.now(), "http2");
 }
 
 loadMappings();

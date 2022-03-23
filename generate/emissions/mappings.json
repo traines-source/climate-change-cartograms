@@ -9,6 +9,7 @@
                 "label": {
                     "en": "2100"
                 },
+                "selected": true,
                 "x": 2100,
                 "y": 1427
             }
@@ -95,7 +96,8 @@
                 "id": "wildfires",
                 "label": {
                     "en": "Wildfires"
-                }
+                },
+                "selected": true
             },
             {
                 "id": "sealevel",

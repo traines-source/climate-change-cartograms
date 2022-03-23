@@ -234,8 +234,8 @@ def create_permutations(mappings):
         #perm = 0b0101000000 #reverse
         #if int(perm) != i:
         #    skip_permutation = True
-        if any_parameters:
-            skip_permutation = True
+        #if any_parameters:
+        #    skip_permutation = True
         
         if not skip_permutation:
             buffer.append(create_permutation(mappings, binaries))

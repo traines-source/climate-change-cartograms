@@ -55,7 +55,7 @@ msgid "wildfires"
 msgstr "Waldbrände"
 
 msgid "sealevel"
-msgstr "Meeresspiegel"
+msgstr "Meeresspiegelanstieg"
 
 msgid "wbgt"
 msgstr "Unerträgliche Hitze"
