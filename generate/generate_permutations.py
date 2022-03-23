@@ -6,12 +6,14 @@ import numpy.ma as ma
 import cv2
 import imageio as iio
 import os
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
+from shapely.ops import nearest_points
 import sys
 sys.path.append('../')
 import utils
 
-TARGET_RESOLUTION=(400,200)
-PRESENTATION_RESOLUTION=(200,100)
+TARGET_RESOLUTION=(600,300)
 
 def write_png(filename, im):
     iio.imwrite(filename, np.rint(im*255).astype(np.uint8))
@@ -129,6 +131,9 @@ def create_permutation(mappings, binaries):
     
     return {"filename": filename, "data": result}
 
+def index(x, y):
+    return y*(TARGET_RESOLUTION[0]+1)+x
+
 def write_permutation(filled_result, filename):    
     filename_densities = "working/densities.dat"
     filename_distorted = "working/distorted.dat"
@@ -136,14 +141,43 @@ def write_permutation(filled_result, filename):
     write_png("working/"+filename+".png", filled_result)        
 
     os.system("cart {} {} {} {}".format(TARGET_RESOLUTION[0], TARGET_RESOLUTION[1], filename_densities, filename_distorted))
-    distorted = read_lines(filename_distorted)
-    ratio = TARGET_RESOLUTION[0]/PRESENTATION_RESOLUTION[0]
-    if not ratio.is_integer():
-        raise Exception("Target-Presentation ratio must be integer")
-    #matrix = np.reshape(distorted, (TARGET_RESOLUTION[0]+1, TARGET_RESOLUTION[1]+1))
-    #scaled = [matrix[i][j] for i in range(0, len(matrix), int(ratio)) for j in range(0, len(matrix[i]), int(ratio))]
-    #output = np.array(scaled).flatten()
-    output = distorted    
+    distorted = read_lines(filename_distorted)    
+    pts = [[float(axis) for axis in entry.split(" ")] for entry in distorted]
+    """
+    oob = 0
+    for x in range(1, TARGET_RESOLUTION[0]):
+        for y in range(1, TARGET_RESOLUTION[1]):
+            p = pts[index(x, y)]
+            point = Point(p[0], p[1])
+            surrounding_coords = [(x-1, y-1), (x, y-1), (x+1, y-1), (x+1, y), (x+1, y+1), (x, y+1), (x-1, y+1), (x-1, y)]
+            #polygon = Polygon([Point(pts[index(c[0], c[1])]) for c in surrounding_coords])
+            b = pts[index(x-1, y)]
+            c = (0,0)
+            if p[0] < b[0]:
+                p = c
+                oob +=1
+            b = pts[index(x+1, y)]
+            if p[0] > b[0]:
+                p = c
+                oob +=1
+            b = pts[index(x, y-1)]
+            if p[1] < b[1]:
+                p = c
+                oob +=1
+            b = pts[index(x, y+1)]
+            if p[1] > b[1]:
+                p = c
+                oob +=1
+            pts[index(x, y)] = p
+            #print(polygon, polygon.area, polygon.is_valid)
+            #if not polygon.contains(point):
+                #oob +=1
+                #print(point.wkt, "is out of bounds")
+                #p1, p2 = nearest_points(polygon, point)
+                #pts[index(x, y)] = (p1.x, p1.y)
+    print(oob, "points out of bounds")
+    """
+    output = [" ".join([str(round(axis, 1)) for axis in entry])+"\n" for entry in pts]
     write_lines("working/"+filename+".csv", output)
 
 def resolve_buffer(buffer):
@@ -196,6 +230,9 @@ def create_permutations(mappings):
         if any_parameters and (today_mode or not any_impact):
             skip_permutation = True
         #if not today_mode:
+        #    skip_permutation = True
+        #perm = 0b0101000000 #reverse
+        #if int(perm) != i:
         #    skip_permutation = True
         if any_parameters:
             skip_permutation = True

@@ -1,7 +1,7 @@
 import { Vector } from "./Vector";
 import { CrumpledImage, Dependent } from "./CrumpledImage";
 
-const GRID_DIMEN = new Vector(400, 200);
+const GRID_DIMEN = new Vector(600, 300);
 
 let mappings: MappingCollection | undefined = undefined;
 let initial = true;
@@ -101,7 +101,7 @@ function createControls() {
     if (controls == undefined)
         throw new Error("Can't populate controls")
 
-    const binaries = getBinaries();
+    const binaries = getBinaries();    
     for (let i=0; i<binaries.length; i++) {
         (<HTMLInputElement>document.getElementById(binaries[i].id)).oninput = updateMap
     }
