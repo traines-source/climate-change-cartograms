@@ -31,18 +31,21 @@ export class CrumpledImage {
     }
 
     setTexCoords(srcTriangles: [Vector, Vector, Vector][], dependents: Dependent[]) {
+        const newStateCanvas = this.matrixConvertCoords(srcTriangles); //200ms
+        
+        this.setInternalTexCoords(newStateCanvas, dependents);
+    }
+    private setInternalTexCoords(srcTriangles: number[], dependents: Dependent[]) {
         this.dependents = dependents;
         this.dependentsUpdateFrom(srcTriangles);
         this.dependentsUpdateTo(srcTriangles);
         this.dependentsInterpolate(0);
-        const currentState = this.matrixConvertCoords(srcTriangles);
-        this.vertexCount = currentState.length / 2;
+        this.vertexCount = srcTriangles.length / 2;
         console.log(performance.now(), "befsrc");
-        const texCoords = this.matrixConvertCoords(srcTriangles, v => this.grid2ImgCoords(v)); // 100ms
+        const texCoords = this.canvas2ImgCoords(srcTriangles); // 100ms
         console.log(performance.now(), "befsetip");
-        this.glUpdateFrom(currentState);
+        this.glUpdateFrom(srcTriangles);
         this.glTexCoords(texCoords);
-       
     
         console.log(performance.now(), "aftersetup");
         
@@ -92,7 +95,11 @@ export class CrumpledImage {
     update(newState: [Vector, Vector, Vector][], animate: boolean) {
         console.log(performance.now(), "received update");
         const newStateCanvas = this.matrixConvertCoords(newState); //200ms
-        this.mapTriangles(newStateCanvas);
+        this.internalUpdate(newStateCanvas, animate);
+    }
+
+    private internalUpdate(newState: number[], animate: boolean) {
+        this.mapTriangles(newState);
         this.dependentsUpdateTo(newState);
 
         this.nonce++;
@@ -114,7 +121,7 @@ export class CrumpledImage {
             this.dependentsInterpolate(x);
             
             if (isLast) {
-                this.glUpdateFrom(newStateCanvas);
+                this.glUpdateFrom(newState);
                 this.dependentsUpdateFrom(newState);
                 console.log(performance.now(), "applied update", performance.now()-s);
             }
@@ -122,16 +129,19 @@ export class CrumpledImage {
         });       
     }
 
-    private dependentsUpdateFrom(newState: [Vector, Vector, Vector][]) {
+    private toTriangle(state: number[], i: number): [Vector, Vector, Vector] {
+        return [new Vector(state[i*6], state[i*6+1]), new Vector(state[i*6+2], state[i*6+3]), new Vector(state[i*6+4], state[i*6+5])];
+    }
+
+    private dependentsUpdateFrom(newState: number[]) {
         for (const dependent of this.dependents) {
-            dependent.from = Vector.euclidianCoordinates(newState[dependent.triangleIndex], dependent.barycentric);
-            console.log(dependent.triangleIndex, newState[dependent.triangleIndex], dependent.from);
+            dependent.from = Vector.euclidianCoordinates(this.toTriangle(newState, dependent.triangleIndex), dependent.barycentric);
         }
     }
 
-    private dependentsUpdateTo(newState: [Vector, Vector, Vector][]) {
+    private dependentsUpdateTo(newState: number[]) {
         for (const dependent of this.dependents) {
-            dependent.to = Vector.euclidianCoordinates(newState[dependent.triangleIndex], dependent.barycentric);
+            dependent.to = Vector.euclidianCoordinates(this.toTriangle(newState, dependent.triangleIndex), dependent.barycentric);
         }
     }    
 
@@ -156,6 +166,14 @@ export class CrumpledImage {
         this.glUpdateTo(newState);
     }
     
+    private canvas2ImgCoords(state: number[]) {
+        const coords: number[] = [];
+        for (let i=0;i<state.length;i+=2) {
+            coords.push(state[i]/2+0.5, state[i+1]/(-2)-0.5);
+        }
+        return coords;
+    }
+
     private grid2ImgCoords(v: Vector) {
         const scale = 1 / this.gridDimen.x;
         return new Vector(v.x*scale, v.y*1/this.gridDimen.y);

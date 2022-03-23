@@ -205,8 +205,8 @@ function createCities(cities: any, triangles: [Vector, Vector, Vector][]): Depen
         console.log(x, y, barycentric, Vector.euclidianCoordinates(triangles[index], barycentric));
         dependents.push({
             callback: (gridPos: Vector) => {
-                c.style.left = gridPos.x/GRID_DIMEN.x*100+'%';
-                c.style.top = gridPos.y/GRID_DIMEN.y*100+'%';
+                c.style.left = (gridPos.x/2*100+50)+'%';
+                c.style.top = (gridPos.y/-2*100+50)+'%';
             },
             triangleIndex: index,
             barycentric: barycentric
