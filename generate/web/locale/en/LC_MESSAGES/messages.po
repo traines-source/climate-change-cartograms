@@ -37,7 +37,7 @@ msgid "today"
 msgstr "Today"
 
 msgid "coalplants"
-msgstr "Shut down coal and gas plants"
+msgstr "Shut down coal and gas power plants"
 
 msgid "industry"
 msgstr "Make industry CO2 neutral"
@@ -68,10 +68,10 @@ msgstr ""
 
 msgid "coalplants_description"
 msgstr ""
-"Coal and gas plants are responsible for a large part of CO2 emissions. "
-"Here it is assumed that of the total emissions from now until 2100 "
-"according to the reference scenario, 80%% are avoided. Also see sources "
-"[7-15]."
+"Coal and gas power plants are responsible for a large part of CO2 "
+"emissions. Here it is assumed that of the total emissions from now until "
+"2100 according to the reference scenario, 80%% are avoided. Also see "
+"sources [7-15]."
 
 msgid "industry_description"
 msgstr ""
