@@ -71,6 +71,10 @@ body {
 .controls input:checked+label {
     background-color: #004D40;   
 }
+.controls input:disabled+label {
+    background-color: #dbdbdb;
+    cursor: default;
+}
 .controls label.toggle {
     padding: 0;
     overflow: hidden;

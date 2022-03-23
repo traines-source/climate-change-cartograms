@@ -112,8 +112,24 @@ function isChecked(id: string) {
     return (<HTMLInputElement>document.getElementById(id)).checked
 }
 
-function permutationStr(binaries: Mapping[]) {
-    return binaries.map(b => b.id+"-"+(+isChecked(b.id))).join("_");
+function permutationStr(ignoreParameters: boolean): string {
+    if (mappings == undefined) {
+        return "";
+    }
+    const l = (b: Mapping) => b.id+"-"+(+isChecked(b.id))
+    const year = mappings.year.mapping.map(l);
+    const params = mappings.parameters.mapping.map(b => b.id+"-"+(+(isChecked(b.id) && !ignoreParameters)));
+    const metrics = mappings.metrics.mapping.map(l);
+    const impacts = mappings.impacts.mapping.map(l);
+    return year.concat(params, metrics, impacts).join("_");
+}
+
+function toggleParameterCheckboxes(disabled: boolean) {
+    if (mappings == undefined) {
+        return;
+    }
+    console.log("dis", disabled, mappings.impacts.mapping.map(impact => isChecked(impact.id)));
+    mappings.parameters.mapping.map(param => (<HTMLInputElement>document.getElementById(param.id)).disabled = disabled);
 }
 
 function updateMap() {
@@ -121,8 +137,13 @@ function updateMap() {
     if (mappings == undefined) {
         return;
     }
-    const year2100 = isChecked(mappings.year.mapping[0].id);
-    const emissions = year2100 ? cumulateCo2Emissions() : 0;
+    const todayMode = !isChecked(mappings.year.mapping[0].id);
+    const anyImpact = mappings.impacts.mapping.map(impact => isChecked(impact.id)).reduce((a, b) => a || b);
+    const anyParameters = mappings.parameters.mapping.map(param => isChecked(param.id)).reduce((a, b) => a || b);
+
+    toggleParameterCheckboxes(todayMode);
+
+    const emissions = todayMode ? 0 : cumulateCo2Emissions();
     console.log('Cumulated CO2 emissions:', emissions);
     const temperature = interpolateMapping(mappings.impacts_scenarios.mapping, emissions);
     console.log('Temperature forecast:', temperature);
@@ -130,7 +151,7 @@ function updateMap() {
 
     console.log(performance.now(), "beffetch");
 
-    fetch('/dist/permutations/'+permutationStr(getBinaries())+'.csv') //100ms
+    fetch('/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv') //100ms
     .then(response => {
         console.log(performance.now(), "beftext");
         const t = response.text();
