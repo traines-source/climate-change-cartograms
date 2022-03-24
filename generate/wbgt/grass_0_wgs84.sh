@@ -86,7 +86,7 @@ calculateForRcp() {
 
     echo "Normalizing..."
     #r.mapcalc "wbgt_${1} = min(15.0, max(wbgt_${1}_max-30.0, 0.0))/15.0" --overwrite
-    r.mapcalc "wbgt_${1} = min(15.0, max(wbgt_${1}_max+(${MEAN_CALIBRATION})-30.0, 0.0))/15.0" --overwrite
+    r.mapcalc "wbgt_${1} = min(10.0, max(wbgt_${1}_max+(${MEAN_CALIBRATION})-35.0, 0.0))/10.0" --overwrite
 
     echo "Done."
 }

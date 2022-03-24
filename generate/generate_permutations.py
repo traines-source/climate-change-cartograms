@@ -203,16 +203,15 @@ def resolve_buffer(buffer):
     if len(buffer) == 0:
         return
     perm_max = 0.0
-    perm_mean = None
+    perm_mean = 0
     for entry in buffer:            
         entry["data"] = ma.masked_array(entry["data"], mask)
-        if perm_mean is None:
-            perm_mean = entry["data"].mean() #baseline
+        perm_mean += entry["data"].mean() #baseline
         new_max = entry["data"].max()
         if new_max > perm_max:
             perm_max = new_max
-    perm_mean *= 1.0/perm_max
-    print("Combo max and mean:", perm_max, perm_mean*1.0/perm_max)
+    perm_mean *= 1.0/perm_max/len(buffer)
+    print("Combo max and mean:", perm_max, perm_mean)
     for entry in buffer:
         entry["data"] *= 1.0/perm_max
         entry["data"] = entry["data"].filled(perm_mean)
