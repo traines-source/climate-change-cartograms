@@ -165,9 +165,9 @@ function createCities(cities: any): Dependent[] {
         c.className = 'city';
         container?.appendChild(c);
         dependents.push({
-            callback: (gridPos: Vector) => {
-                c.style.left = (gridPos.x/2*100+50)+'%';
-                c.style.top = (gridPos.y/-2*100+50)+'%';
+            callback: (canvasCoords: Vector) => {
+                c.style.left = (canvasCoords.x/2*100+50)+'%';
+                c.style.top = (canvasCoords.y/-2*100+50)+'%';
             },
             coords: Vector.fromArray(city['coordinates'])
         });
