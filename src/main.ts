@@ -1,5 +1,8 @@
 import { Vector } from "./Vector";
-import { CrumpledImage, Dependent } from "./CrumpledImage";
+import { CrumpledImage } from "./CrumpledImage";
+import { Dependent } from "./CommonRenderer";
+import { Mapping, MappingCollection } from "./MappingCollection";
+import { Co2EmissionsMapper as Co2EmissionsCalculator } from "./Co2EmissionsMapper";
 
 const GRID_DIMEN = new Vector(600, 300);
 
@@ -7,72 +10,14 @@ let mappings: MappingCollection | undefined = undefined;
 let initial = true;
 let selectedBinary: string = '2100';
 
-interface Label { [id: string]: string }
-interface Mapping {
-    id: string;
-    label: Label;
-    x: number;
-    y: number;
-}
-interface MappingCollection { 
-    [id: string]: {
-        label: Label;
-        mapping: Mapping[];
-    }
-};
-
 const crumpledMap = new CrumpledImage(GRID_DIMEN, 2000);
-
-function interpolateMapping(mappings: Mapping[], x: number): number {
-    let upper : Mapping | undefined = undefined;
-    let lower : Mapping | undefined = undefined;
-    for (let i=0; i<mappings.length; i++) {
-        if (mappings[i].x >= x && (upper == undefined || mappings[i].x < upper.x)) {
-            upper = mappings[i];
-        }
-        if (mappings[i].x <= x && (lower == undefined || mappings[i].x > lower.x)) {
-            lower = mappings[i];
-        }
-    }
-    if (lower == undefined) {
-        if (upper == undefined) {
-            throw new Error("No interpolation possible")
-        }
-        return upper.y;
-    }
-    if (upper == undefined)
-        return lower.y;
-    if (upper == lower)
-        return upper.y;
-    return (x-lower.x)/(upper.x-lower.x)*(upper.y-lower.y)+lower.y;
-}
+const co2Calculator = new Co2EmissionsCalculator(isChecked);
 
 function getBinaries(): Mapping[] {
     if (mappings == undefined) {
         return [];
     }
     return mappings.year.mapping.concat(mappings.parameters.mapping, mappings.metrics.mapping, mappings.impacts.mapping);
-}
-
-function createControls() {
-    if (mappings == undefined) {
-        return;
-    }
-
-    const controls = document.getElementById('controls');
-    if (controls == undefined)
-        throw new Error("Can't populate controls")
-
-    const binaries = getBinaries();
-    const hash = window.location.hash.replace('#', '').split('_').map(b => b.split('-')[1]);
-    for (let i=0; i<binaries.length; i++) {
-        const el = <HTMLInputElement>document.getElementById(binaries[i].id);
-        el.onchange = updateMap;
-        if (hash.length == binaries.length) {
-            el.checked = hash[i] == '1';
-        }
-    }
-    updateMap();
 }
 
 function isChecked(id: string) {
@@ -114,13 +59,9 @@ function updateMap(evt?: Event) {
     }
     const todayMode = !isChecked(mappings.year.mapping[0].id);
     const anyImpact = mappings.impacts.mapping.map(impact => isChecked(impact.id)).reduce((a, b) => a || b);
-
     toggleParameterCheckboxes(todayMode);
-
-    const emissions = todayMode ? 0 : cumulateCo2Emissions();
-    console.log('Cumulated CO2 emissions:', emissions);
-    const temperature = interpolateMapping(mappings.impacts_scenarios.mapping, emissions);
-    console.log('Temperature forecast:', temperature);
+    
+    const temperature = co2Calculator.calculateTemperature(mappings, todayMode);
     updateTemperature(temperature);
 
     fetch('/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv')
@@ -135,24 +76,30 @@ function updateMap(evt?: Event) {
     });
 }
 
-function cumulateCo2Emissions() {
-    if (mappings == undefined) {
-        return 0;
-    }
-    let cumul_co2 = mappings.year.mapping[0].y;
-    const params = mappings.parameters.mapping
-    for (let i=0; i<params.length; i++) {
-        const checkbox = <HTMLInputElement>document.getElementById(params[i].id);
-        if (checkbox.checked) {
-            cumul_co2 += params[i].y;
-        }
-    }
-    return cumul_co2;
-}
-
 function updateTemperature(temperature: number) {
     const t = <HTMLElement>document.getElementById('temperature');
     t.innerHTML = Math.round((temperature+1)*10)/10+"";
+}
+
+function createControls() {
+    if (mappings == undefined) {
+        return;
+    }
+
+    const controls = document.getElementById('controls');
+    if (controls == undefined)
+        throw new Error("Can't populate controls")
+
+    const binaries = getBinaries();
+    const hash = window.location.hash.replace('#', '').split('_').map(b => b.split('-')[1]);
+    for (let i=0; i<binaries.length; i++) {
+        const el = <HTMLInputElement>document.getElementById(binaries[i].id);
+        el.onchange = updateMap;
+        if (hash.length == binaries.length) {
+            el.checked = hash[i] == '1';
+        }
+    }
+    updateMap();
 }
 
 function createCities(cities: any): Dependent[] {

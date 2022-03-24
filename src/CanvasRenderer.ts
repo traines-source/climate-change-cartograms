@@ -1,4 +1,4 @@
-import { Renderer } from "./CrumpledImage";
+import { Renderer } from "./CommonRenderer";
 
 export class CanvasRenderer implements Renderer {
     private canvas: HTMLCanvasElement;

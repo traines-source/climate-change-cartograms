@@ -1,5 +1,5 @@
+import { Dependent, Renderer } from "./CommonRenderer";
 import { CoordinateMapper } from "./CoordinateMapper";
-import { Dependent, Renderer } from "./CrumpledImage";
 import { Vector } from "./Vector";
 
 interface EnrichedDependent extends Dependent {    
@@ -16,10 +16,7 @@ export class DependentsRenderer implements Renderer {
     constructor(private mapper: CoordinateMapper) {
     }
 
-    initialize(): void {
-    }
-
-    initializeWithDependents(dependents: Dependent[], triangles: number[]) {
+    initialize(triangles: number[], dependents: Dependent[]) {
         const enrichedDependents: EnrichedDependent[] = [];
         for (const dependent of dependents) {            
             const barycentric = this.mapper.gridToBarycentricCoords(dependent.coords, triangles);
