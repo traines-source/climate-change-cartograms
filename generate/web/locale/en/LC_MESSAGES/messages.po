@@ -162,3 +162,8 @@ msgstr ""
 msgid "imprint"
 msgstr "Imprint/Privacy"
 
+msgid "webglerror"
+msgstr ""
+"The map is loading... If the map doesn't appear, please try refreshing "
+"the page or try another browser."
+

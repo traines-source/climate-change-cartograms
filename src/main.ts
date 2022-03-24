@@ -79,7 +79,7 @@ function createControls() {
 
     const binaries = getBinaries();    
     for (let i=0; i<binaries.length; i++) {
-        (<HTMLInputElement>document.getElementById(binaries[i].id)).oninput = updateMap;
+        (<HTMLInputElement>document.getElementById(binaries[i].id)).onchange = updateMap;
     }
     updateMap();
 }
@@ -122,7 +122,6 @@ function updateMap(evt?: Event) {
     }
     const todayMode = !isChecked(mappings.year.mapping[0].id);
     const anyImpact = mappings.impacts.mapping.map(impact => isChecked(impact.id)).reduce((a, b) => a || b);
-    const anyParameters = mappings.parameters.mapping.map(param => isChecked(param.id)).reduce((a, b) => a || b);
 
     toggleParameterCheckboxes(todayMode);
 
@@ -134,6 +133,7 @@ function updateMap(evt?: Event) {
 
     fetch('/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv')
     .then(response => {
+        console.log(performance.now(), "file received");
         if (response.body != null) {
             crumpledMap.streamUpdate(response.body, true);
             initial = false;
@@ -161,10 +161,6 @@ function cumulateCo2Emissions() {
 function updateTemperature(temperature: number) {
     const t = <HTMLElement>document.getElementById('temperature');
     t.innerHTML = Math.round((temperature+1)*10)/10+"";
-}
-
-function v(p: number, q: number, t: number) {
-    return p*(1-t)+q*t;
 }
 
 function createCities(cities: any, triangles: number[]): Dependent[] {

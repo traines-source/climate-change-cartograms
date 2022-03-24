@@ -166,3 +166,8 @@ msgstr ""
 msgid "imprint"
 msgstr "Impressum/Datenschutz"
 
+msgid "webglerror"
+msgstr ""
+"Die Karte wird geladen... Wenn die Karte nicht erscheint, versuchen Sie, "
+"die Seite neu zu laden oder versuchen Sie es mit einem anderen Browser."
+

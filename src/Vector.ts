@@ -8,7 +8,7 @@ export class Vector {
         return new Vector(arr[0], arr[1]);
     }
 
-    get length(): number {
+    length(): number {
         return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
     }
 
@@ -25,13 +25,13 @@ export class Vector {
     }
 
     withLength(length: number): Vector {
-        const ratio = this.length != 0 ? length/this.length : 0;
+        const ratio = this.length() != 0 ? length/this.length() : 0;
         return new Vector(this.x*ratio, this.y*ratio);
     }
 
     between(other: Vector, x: number) {
         const delta = this.delta(other);
-        return this.add(delta.withLength(delta.length*x));
+        return this.add(delta.withLength(delta.length()*x));
     }
 
     private static toTriangle(state: number[], i: number): [Vector, Vector, Vector] {

@@ -103,3 +103,7 @@ msgstr ""
 
 msgid "imprint"
 msgstr ""
+
+msgid "webglerror"
+msgstr ""
+

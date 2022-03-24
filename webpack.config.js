@@ -5,12 +5,12 @@ module.exports = {
   mode: 'production',
   entry: './src/main.ts',
   devtool: 'source-map',
+  target: ['web', 'es5'],
   module: {
     rules: [
       {
         test:  /\.tsx?$/,
         use: [
-          {loader: 'expose-loader', options: { exposes: [{globalName: 'CCC', override: true}]}},
           {loader: 'ts-loader', options: {onlyCompileBundledFiles: true}}
         ],
         include: /src/,

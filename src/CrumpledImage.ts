@@ -52,6 +52,9 @@ export class CrumpledImage {
             this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 
             this.pixelRatio = window.devicePixelRatio;
+            if (this.programInfo) {
+                this.glDeferredDraw();
+            }
         }
     }
 
@@ -79,8 +82,15 @@ export class CrumpledImage {
         im.src = "/dist/map_"+this.getPreferredImgResolution()+"x.jpg"; 
     }
 
+    private textDecode(arr: Uint8Array) {
+        let str = '';
+        for (var i = 0; i < arr.byteLength; i++) {
+            str += String.fromCharCode(arr[i]);
+        }
+        return str;
+    }
+
     async streamUpdate(newState: ReadableStream<Uint8Array>, animate: boolean) {
-        const utf8Decoder = new TextDecoder("utf-8");
         const reader = newState.getReader();
         const re = /\n| /gm;
         const width = (this.gridDimen.x+1)*2;
@@ -97,7 +107,7 @@ export class CrumpledImage {
         
         const pump = async () => {
             const { done, value } = await reader.read();
-            const chunk = remainder + (value ? utf8Decoder.decode(value, { stream: true }) : "");
+            const chunk = remainder + (value ? this.textDecode(value) : "");
             while (true) {
                 let result = re.exec(chunk);
                 if (!result) {
