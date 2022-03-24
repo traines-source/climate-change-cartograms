@@ -30,8 +30,12 @@ function findTriangles() {
     const triangles: number[] = [];
     for (let y=0;y<GRID_DIMEN.y; y+=1) {
         for (let x=0;x<GRID_DIMEN.x; x+=1) {
-            triangles.push(sX*(x)-1, sY*(y)+1, sX*(x+1)-1, sY*(y)+1, sX*(x)-1, sY*(y+1)+1);
-            triangles.push(sX*(x+1)-1, sY*(y+1)+1, sX*(x+1)-1, sY*(y)+1, sX*(x)-1, sY*(y+1)+1);
+            const trX = sX*(x+1)-1;
+            const trY = sY*(y)+1;
+            const blX = sX*(x)-1;
+            const blY = sY*(y+1)+1;
+            triangles.push(sX*(x)-1, sY*(y)+1, blX, blY, trX, trY);
+            triangles.push(sX*(x+1)-1, sY*(y+1)+1, trX, trY, blX, blY);
         }
     }
     return triangles;
@@ -77,9 +81,14 @@ function createControls() {
     if (controls == undefined)
         throw new Error("Can't populate controls")
 
-    const binaries = getBinaries();    
+    const binaries = getBinaries();
+    const hash = window.location.hash.replace('#', '').split('_').map(b => b.split('-')[1]);
     for (let i=0; i<binaries.length; i++) {
-        (<HTMLInputElement>document.getElementById(binaries[i].id)).onchange = updateMap;
+        const el = <HTMLInputElement>document.getElementById(binaries[i].id);
+        el.onchange = updateMap;
+        if (hash.length == binaries.length) {
+            el.checked = hash[i] == '1';
+        }
     }
     updateMap();
 }
@@ -119,6 +128,7 @@ function updateMap(evt?: Event) {
             (<HTMLInputElement>document.getElementById(id+'_description')).style.display = 'block';
         }
         selectedBinary = id+'_description';
+        location.hash = '#'+permutationStr(false);
     }
     const todayMode = !isChecked(mappings.year.mapping[0].id);
     const anyImpact = mappings.impacts.mapping.map(impact => isChecked(impact.id)).reduce((a, b) => a || b);

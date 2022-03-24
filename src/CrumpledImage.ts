@@ -59,7 +59,7 @@ export class CrumpledImage {
     }
 
     private getPreferredImgResolution() {
-        const available = [1024, 2048, 4096, 8192];
+        const available = [1024, 2048, 4096, 8192, 16384];
         const max = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE)/2;
         let found = undefined;
         for(let i=0; i<available.length; i++) {
@@ -125,7 +125,7 @@ export class CrumpledImage {
                 const xOrYValue = parseFloat(chunk.substring(char, result.index));
                 currLine[x] = x%2 == 0 ? xOrYValue*scaleX-1 : xOrYValue*scaleY+1;
                 if (x % 2 == 1 && x >= 3 && index > width) {
-                    triangles.push(lastLine[x-3], lastLine[x-2], lastLine[x-1], lastLine[x-0], currLine[x-3], currLine[x-2]);
+                    triangles.push(lastLine[x-3], lastLine[x-2], currLine[x-3], currLine[x-2], lastLine[x-1], lastLine[x-0]);
                     triangles.push(currLine[x-1], currLine[x-0], lastLine[x-1], lastLine[x-0], currLine[x-3], currLine[x-2]);
                 }
                 index++;
@@ -202,9 +202,12 @@ export class CrumpledImage {
     }
     
     private canvas2ImgCoords(state: number[]) {
-        const coords: number[] = [];
-        for (let i=0;i<state.length;i+=2) {
-            coords.push(state[i]/2+0.5, state[i+1]/(-2)-0.5);
+        const coords: number[] = new Array(state.length);
+        const scaleX = 1/2;
+        const scaleY = 1/-2;
+        for (let i=0; i<state.length; i+=2) {
+            coords[i] = state[i]*scaleX+0.5;
+            coords[i+1] = state[i+1]*scaleY-0.5;
         }
         return coords;
     }
@@ -260,8 +263,8 @@ export class CrumpledImage {
             }
         };
         this.gl.useProgram(this.programInfo.program);
-        //this.gl.enable(this.gl.CULL_FACE);
-        //this.gl.cullFace(this.gl.FRONT);
+        this.gl.cullFace(this.gl.BACK);
+        this.gl.enable(this.gl.CULL_FACE);
 
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
         
