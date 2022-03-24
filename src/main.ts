@@ -23,24 +23,6 @@ interface MappingCollection {
 
 const crumpledMap = new CrumpledImage(GRID_DIMEN, 2000);
 
-const sX = 2/GRID_DIMEN.x;
-const sY = (-2)/GRID_DIMEN.y;
-
-function findTriangles() {
-    const triangles: number[] = [];
-    for (let y=0;y<GRID_DIMEN.y; y+=1) {
-        for (let x=0;x<GRID_DIMEN.x; x+=1) {
-            const trX = sX*(x+1)-1;
-            const trY = sY*(y)+1;
-            const blX = sX*(x)-1;
-            const blY = sY*(y+1)+1;
-            triangles.push(sX*(x)-1, sY*(y)+1, blX, blY, trX, trY);
-            triangles.push(sX*(x+1)-1, sY*(y+1)+1, trX, trY, blX, blY);
-        }
-    }
-    return triangles;
-}
-
 function interpolateMapping(mappings: Mapping[], x: number): number {
     let upper : Mapping | undefined = undefined;
     let lower : Mapping | undefined = undefined;
@@ -173,7 +155,7 @@ function updateTemperature(temperature: number) {
     t.innerHTML = Math.round((temperature+1)*10)/10+"";
 }
 
-function createCities(cities: any, triangles: number[]): Dependent[] {
+function createCities(cities: any): Dependent[] {
     const dependents: Dependent[] = [];
     const container = document.getElementById('container');
     for (let i=0; i<cities.length; i++) {
@@ -182,19 +164,12 @@ function createCities(cities: any, triangles: number[]): Dependent[] {
         c.innerHTML = city['name'];
         c.className = 'city';
         container?.appendChild(c);
-        const x = city['coordinates'][0];
-        const y = city['coordinates'][1];
-        const evenIndex = (Math.floor(x)+Math.floor(y)*(GRID_DIMEN.x))*2;
-        const uneven = x-Math.floor(x)+y-Math.floor(y) > 1 ? 1 : 0;
-        const index = evenIndex + uneven;
-        const barycentric = (new Vector(sX*x-1, sY*y+1)).barycentricCoordinates(triangles, index);
         dependents.push({
             callback: (gridPos: Vector) => {
                 c.style.left = (gridPos.x/2*100+50)+'%';
                 c.style.top = (gridPos.y/-2*100+50)+'%';
             },
-            triangleIndex: index,
-            barycentric: barycentric
+            coords: Vector.fromArray(city['coordinates'])
         });
     }
     return dependents;
@@ -207,8 +182,7 @@ function loadMappings() {
         mappings = json;
         createControls();
         window.setTimeout(() => {
-            const triangles = findTriangles();
-            crumpledMap.setTexCoords(triangles, createCities(json["cities"]["mapping"], triangles));
+            crumpledMap.initialize(createCities(json["cities"]["mapping"]));
         }, 1);      
     });
 }

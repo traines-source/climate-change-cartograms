@@ -2,11 +2,14 @@ import { Animator } from "./Animator";
 import { Vector } from "./Vector";
 
 export interface Dependent {
-    triangleIndex: number;
-    barycentric: [number, number, number]
-    from?: Vector;
-    to?: Vector;
+    coords: Vector;
     callback: (gridPos: Vector) => void;
+}
+interface EnrichedDependent extends Dependent {    
+    triangleIndex: number;
+    barycentric: [number, number, number];
+    from?: Vector;
+    to?: Vector;    
 }
 
 export class CrumpledImage {
@@ -16,7 +19,10 @@ export class CrumpledImage {
     private programInfo: any;
     private gl: WebGLRenderingContext;
     private nonce = 0;
-    private dependents: Dependent[] = [];
+    private dependents: EnrichedDependent[] = [];
+
+    readonly sX = 2/this.gridDimen.x;
+    readonly sY = (-2)/this.gridDimen.y;
 
     constructor(private gridDimen: Vector, private animationDurationMs: number) {
         this.canvas = <HTMLCanvasElement>document.getElementById('map');
@@ -28,15 +34,28 @@ export class CrumpledImage {
         this.setTexture();                     
     }
 
-    setTexCoords(srcTriangles: number[], dependents: Dependent[]) {
-        this.dependents = dependents;
-        this.dependentsUpdateFrom(srcTriangles);
-        this.dependentsUpdateTo(srcTriangles);
-        this.dependentsInterpolate(0);
+    initialize(dependents: Dependent[]) {
+        const srcTriangles = this.defaultTriangles();
+        this.dependentsPrepare(dependents, srcTriangles);
         this.vertexCount = srcTriangles.length / 2;
         const texCoords = this.canvas2ImgCoords(srcTriangles);
         this.glUpdateFrom(srcTriangles);
         this.glTexCoords(texCoords);        
+    }
+
+    private defaultTriangles() {
+        const triangles: number[] = [];
+        for (let y=0;y<this.gridDimen.y; y+=1) {
+            for (let x=0;x<this.gridDimen.x; x+=1) {
+                const trX = this.sX*(x+1)-1;
+                const trY = this.sY*(y)+1;
+                const blX = this.sX*(x)-1;
+                const blY = this.sY*(y+1)+1;
+                triangles.push(this.sX*(x)-1, this.sY*(y)+1, blX, blY, trX, trY);
+                triangles.push(this.sX*(x+1)-1, this.sY*(y+1)+1, trX, trY, blX, blY);
+            }
+        }
+        return triangles;
     }
 
     private resizeCanvas() {
@@ -170,6 +189,29 @@ export class CrumpledImage {
             }
             return true;
         });       
+    }
+
+    private dependentsPrepare(dependents: Dependent[], srcTriangles: number[]) {
+        const enrichedDependents: EnrichedDependent[] = [];
+        for (const dependent of dependents) {
+            const x = dependent.coords.x;
+            const y = dependent.coords.y;
+            const evenIndex = (Math.floor(x)+Math.floor(y)*(this.gridDimen.x))*2;
+            const uneven = x-Math.floor(x)+y-Math.floor(y) > 1 ? 1 : 0;
+            const index = evenIndex + uneven;
+            const v = new Vector(this.sX*x-1, this.sY*y+1);
+            const barycentric = v.barycentricCoordinates(srcTriangles, index);
+            enrichedDependents.push({
+                coords: dependent.coords,
+                callback: dependent.callback,
+                triangleIndex: index,
+                barycentric: barycentric,
+                from: v,
+                to: v
+            });            
+        }
+        this.dependents = enrichedDependents;
+        this.dependentsInterpolate(0);
     }
 
     private dependentsUpdateFrom(newState: number[]) {
