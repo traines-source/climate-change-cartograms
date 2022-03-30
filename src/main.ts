@@ -50,6 +50,7 @@ function updateMap(evt?: Event) {
     }
     if (evt != undefined) {
         const id = (<HTMLInputElement>evt?.target).id;
+        (<HTMLInputElement>document.getElementById(id)).className = 'loading';
         (<HTMLInputElement>document.getElementById(selectedBinary)).style.display = 'none';
         if (isChecked(id)) {
             (<HTMLInputElement>document.getElementById(id+'_description')).style.display = 'block';
@@ -68,7 +69,12 @@ function updateMap(evt?: Event) {
     .then(response => {
         console.log(performance.now(), "file received");
         if (response.body != null) {
-            crumpledMap.streamUpdate(response.body, true);
+            crumpledMap.streamUpdate(response.body, true).then(() => {
+                if (evt != undefined) {
+                    const id = (<HTMLInputElement>evt?.target).id;
+                    (<HTMLInputElement>document.getElementById(id)).className = '';
+                }
+            });            
             initial = false;
         } else {
             console.log("Response was null");

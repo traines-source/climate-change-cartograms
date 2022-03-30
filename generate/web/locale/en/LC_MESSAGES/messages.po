@@ -123,7 +123,7 @@ msgstr ""
 "body can't cool itself anymore. A so-called wet-bulb temperature of 35°C "
 "is the theoretical limit that a human can survive without air "
 "conditioning – even in the shade and with enough water. 30°C are already "
-"dangerous.Places that reach wet-bulb temperatures of more than 30°C "
+"dangerous. Places that reach wet-bulb temperatures of more than 35°C "
 "multiple times a year are shown on the map. Also see sources [24-30]."
 
 msgid "about_title"

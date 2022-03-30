@@ -78,7 +78,7 @@ export class CanvasRenderer implements Renderer {
     }
 
     private getPreferredImgResolution() {
-        const available = [1024, 2048, 4096, 8192, 16384];
+        const available = [1024, 2048, 4096, 8192];
         const max = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE)/2;
         let found = undefined;
         for(let i=0; i<available.length; i++) {

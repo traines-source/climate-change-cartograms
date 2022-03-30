@@ -125,7 +125,7 @@ msgstr ""
 "ein Mensch ohne Klimatisierung überleben kann – selbst im Schatten und "
 "mit ausreichend Wasser. Bereits 30°C sind gefährlich. Auf der Karte "
 "dargestellt sind Orte, die mehrfach im Jahr Kühlgrenztemperaturen von "
-"über 30°C erreichen. Siehe auch Quellen [24-30]."
+"über 35°C erreichen. Siehe auch Quellen [24-30]."
 
 msgid "about_title"
 msgstr "Über diese Karte"

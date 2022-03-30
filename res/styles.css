@@ -93,6 +93,30 @@ body {
     border-radius: 8px;
     background-color: #757575;
     color: white;
+    transition: background-color 0.5s ease;
+}
+@keyframes changeColor {
+    0% {
+        background-color: #757575;
+    }
+
+    50% {
+        background-color: #004D40;
+    }
+
+    100% {
+        background-color: #757575;
+    }
+}
+.controls input.loading+label, .controls input.loading+label.toggle span.off, .controls input.loading:checked+label.toggle span.on {
+    animation: changeColor ease;
+    animation-iteration-count: infinite;
+    animation-duration: 1s;    
+}
+
+.controls input.loading+label.toggle span.on, .controls input.loading:checked+label.toggle span.off {
+    background-color: #757575;
+    animation: none;
 }
 .controls input:checked+label {
     background-color: #004D40;   
