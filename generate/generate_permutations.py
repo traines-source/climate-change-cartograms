@@ -16,6 +16,10 @@ import utils
 TARGET_RESOLUTION=(600,300)
 thresh_dist = (TARGET_RESOLUTION[0]/64)**2
 thresh_area = TARGET_RESOLUTION[0]/100
+standard_display_resolution=1920
+standard_triangle_area = ((8192/standard_display_resolution)**2)/2
+
+hires_triangles={}
 
 def write_png(filename, im):
     iio.imwrite(filename, np.rint(im*255).astype(np.uint8))
@@ -182,9 +186,29 @@ def fix_anomalies(pts):
                     pts[index((x, y))] = new_p
     return oob
 
+def update_hires_triangle(coords, triangle_index, pts):
+    distorted_coords = [pts[index(p)] for p in coords]
+    area = abs(triangle_orientation(distorted_coords[0], distorted_coords[1], distorted_coords[2]))
+    if area > standard_triangle_area and (triangle_index not in hires_triangles or area > hires_triangles[triangle_index]['area']):
+        hires_triangles[triangle_index] = {
+            'coords': coords,
+            'area': area,
+            'index': triangle_index
+        }
+
+def update_hires_triangles(pts):
+    for y in range(0, TARGET_RESOLUTION[1]):
+        for x in range(0, TARGET_RESOLUTION[0]):
+            triangle_index = (y*TARGET_RESOLUTION[0]+x)*2
+            update_hires_triangle(((x,   y),  (x,   y+1),(x+1, y  )), triangle_index, pts)
+            update_hires_triangle(((x+1, y+1),(x+1, y),  (x,   y+1)), triangle_index+1, pts)
+
+def output_hires_triangles():
+    utils.write_json('map/working/hires_triangles.json', list(hires_triangles.values()))
+
 def write_permutation(filled_result, filename):    
-    filename_densities = "working/densities.dat"
-    filename_distorted = "working/distorted.dat"
+    filename_densities = "working/"+filename+".densities"
+    filename_distorted = "working/"+filename+".distorted"
     write_dat(filename_densities, filled_result)
     write_png("working/"+filename+".png", filled_result)        
 
@@ -195,6 +219,8 @@ def write_permutation(filled_result, filename):
     oob = fix_anomalies(pts)
     oob += fix_anomalies(pts)
     print(oob, "points out of bounds")
+
+    update_hires_triangles(pts)
     
     output = [" ".join([str(round(axis, 1)) for axis in entry])+"\n" for entry in pts]
     write_lines("working/"+filename+".csv", output)
@@ -243,7 +269,7 @@ def create_permutations(mappings):
         if today_mode and not any_parameters:
             resolve_buffer(buffer)
             buffer = []
-            print("Buffer cleared, new metrics/impacts combo")
+            print("Buffer cleared, new metrics/impacts combo, permutations so far:", useful_permutations)
 
         if any_parameters and (today_mode or not any_impact):
             skip_permutation = True
@@ -276,4 +302,4 @@ write_png("working/mask.png", mask)
 print("Create permutations...")
 create_permutations(mappings)
 
-
+output_hires_triangles()

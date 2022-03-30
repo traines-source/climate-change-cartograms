@@ -18,9 +18,9 @@ RUN pip3 install --no-input opencv-python && apt-get install ffmpeg libsm6 libxe
 RUN pip3 install --no-input geopandas shapely pygeos jinja2 babel markdown
 
 RUN \
-    sed -i 's#<policy domain="resource" name="memory" value="256MiB"/>#<policy domain="resource" name="memory" value="4GiB"/#g' /etc/ImageMagick-6/policy.xml && \
-    sed -i 's#<policy domain="resource" name="map" value="512MiB"/>#<policy domain="resource" name="map" value="8GiB"/>#g' /etc/ImageMagick-6/policy.xml && \
-    sed -i 's#<policy domain="resource" name="width" value="16KP"/>#<policy domain="resource" name="width" value="128KP"/>#g' /etc/ImageMagick-6/policy.xml && \
-    sed -i 's#<policy domain="resource" name="height" value="16KP"/>#<policy domain="resource" name="height" value="128KP"/>#g' /etc/ImageMagick-6/policy.xml && \
-    sed -i 's#<policy domain="resource" name="area" value="126MB"/>#<policy domain="resource" name="area" value="2GB"/>#g' /etc/ImageMagick-6/policy.xml && \
-    sed -i 's#<policy domain="resource" name="disk" value="1GiB"/>#<policy domain="resource" name="disk" value="16GiB"/>#g' /etc/ImageMagick-6/policy.xml
+    sed -i 's#<policy domain="resource" name="memory" value="256MiB"/>#<policy domain="resource" name="memory" value="8GiB"/#g' /etc/ImageMagick-6/policy.xml && \
+    sed -i 's#<policy domain="resource" name="map" value="512MiB"/>#<policy domain="resource" name="map" value="12GiB"/>#g' /etc/ImageMagick-6/policy.xml && \
+    sed -i 's#<policy domain="resource" name="width" value="16KP"/>#<policy domain="resource" name="width" value="512KP"/>#g' /etc/ImageMagick-6/policy.xml && \
+    sed -i 's#<policy domain="resource" name="height" value="16KP"/>#<policy domain="resource" name="height" value="512KP"/>#g' /etc/ImageMagick-6/policy.xml && \
+    sed -i 's#<policy domain="resource" name="area" value="128MB"/>#<policy domain="resource" name="area" value="1GP"/>#g' /etc/ImageMagick-6/policy.xml && \
+    sed -i 's#<policy domain="resource" name="disk" value="1GiB"/>#<policy domain="resource" name="disk" value="32GiB"/>#g' /etc/ImageMagick-6/policy.xml
