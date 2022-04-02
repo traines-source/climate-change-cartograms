@@ -17,13 +17,6 @@ r.patch --overwrite input=$MAPS output=wbgt_elev_mosaic --overwrite
 echo "Zeroing..."
 r.mapcalc expression="wbgt_elev_zeroed = isnull(wbgt_elev_mosaic) ? 0 : wbgt_elev_mosaic" --overwrite
 
-#echo "Preparing calibration..."
-#v.in.ogr input=${SCRIPT_DIR}/calibration.geojson output=wbgt_calibration_v --overwrite
-#v.to.rast input=wbgt_calibration_v type=point output=wbgt_calibration_nulls use=attr attribute_column=wbgt --overwrite
-#r.fillnulls input=wbgt_calibration_nulls output=wbgt_calibration_unsmoothed tension=20 --overwrite
-#r.resamp.filter input=wbgt_calibration_nulls output=wbgt_calibration filter=gauss,box radius=10,10 --overwrite
-#echo "Done."
-
 calculateForRcpModel() {
     MODEL=$2
     SCENARIO=${1}_${2}
@@ -82,8 +75,8 @@ calculateForRcpModel() {
     echo "Calculating max WBGT for year in scenario ${SCENARIO}..."
     r.series input=${BANDS} output=wbgt_${SCENARIO}_max method=quantile quantile=0.99 --overwrite
     r.univar wbgt_${SCENARIO}_max
-    r.out.gdal in=wbgt_${SCENARIO}_max output=${SCRIPT_DIR}/out/${MODEL}.tiff type=Float32 --overwrite -f -c
-    r.out.png -t --overwrite input=wbgt_${SCENARIO}_max output=${SCRIPT_DIR}/out/${MODEL}.png
+    #r.out.gdal in=wbgt_${SCENARIO}_max output=${SCRIPT_DIR}/out/${MODEL}.tiff type=Float32 --overwrite -f -c
+    #r.out.png -t --overwrite input=wbgt_${SCENARIO}_max output=${SCRIPT_DIR}/out/${MODEL}.png
 }
 
 calculateForRcp() {
@@ -101,20 +94,18 @@ calculateForRcp() {
     r.series input=${MODELS} output=wbgt_${SCENARIO}_max method=average --overwrite
     r.univar wbgt_${SCENARIO}_max
 
-    if [ "$1" == "historical" ]; then
-        echo "Calibrating..."
-        #r.mapcalc "wbgt_calibration_delta = wbgt_calibration - wbgt_${SCENARIO}_max" --overwrite
-        r.mapcalc "wbgt_calibration_delta = \"wbgt_historical_ncep-reanalysis_max\" - wbgt_${SCENARIO}_max" --overwrite
-        MEAN_CALIBRATION=$(r.univar wbgt_calibration_delta -t separator=space | tail -n +2 | awk '{ print $6 }')
-        echo "Delta: $MEAN_CALIBRATION"
-        r.out.gdal in=wbgt_calibration output=${SCRIPT_DIR}/out/calib.tiff type=Float32 --overwrite -f -c
-        r.out.png -t --overwrite input=wbgt_calibration output=${SCRIPT_DIR}/out/calib.png
-    fi    
+    #if [ "$1" == "historical" ]; then
+    #    echo "Calibrating..."
+    #    r.mapcalc "wbgt_calibration_delta = \"wbgt_historical_ncep-reanalysis_max\" - wbgt_${SCENARIO}_max" --overwrite
+    #    MEAN_CALIBRATION=$(r.univar wbgt_calibration_delta -t separator=space | tail -n +2 | awk '{ print $6 }')
+    #    echo "Mean Delta to NCEP: $MEAN_CALIBRATION"
+    #    r.out.gdal in=wbgt_calibration output=${SCRIPT_DIR}/out/calib.tiff type=Float32 --overwrite -f -c
+    #    r.out.png -t --overwrite input=wbgt_calibration output=${SCRIPT_DIR}/out/calib.png
+    #fi    
 
     echo "Normalizing..."
     #r.mapcalc "wbgt_${SCENARIO} = min(10.0, max(wbgt_${SCENARIO}_max+wbgt_calibration_delta-35.0, 0.0))/10.0" --overwrite
     r.mapcalc "wbgt_${SCENARIO} = min(5.0, max(wbgt_${SCENARIO}_max-35.0, 0.0))/5.0" --overwrite
-    #r.mapcalc "wbgt_${SCENARIO} = min(10.0, max(wbgt_${SCENARIO}_max+(${MEAN_CALIBRATION})-35.0, 0.0))/10.0" --overwrite
 
     echo "Done."
 }
