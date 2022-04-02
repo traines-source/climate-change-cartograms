@@ -17,12 +17,20 @@ r.patch --overwrite input=$MAPS output=wbgt_elev_mosaic --overwrite
 echo "Zeroing..."
 r.mapcalc expression="wbgt_elev_zeroed = isnull(wbgt_elev_mosaic) ? 0 : wbgt_elev_mosaic" --overwrite
 
-echo "Preparing calibration..."
-v.in.ogr input=${SCRIPT_DIR}/calibration.geojson output=wbgt_calibration_v --overwrite
-v.to.rast input=wbgt_calibration_v type=point output=wbgt_calibration use=attr attribute_column=wbgt --overwrite
-echo "Done."
+#echo "Preparing calibration..."
+#v.in.ogr input=${SCRIPT_DIR}/calibration.geojson output=wbgt_calibration_v --overwrite
+#v.to.rast input=wbgt_calibration_v type=point output=wbgt_calibration_nulls use=attr attribute_column=wbgt --overwrite
+#r.fillnulls input=wbgt_calibration_nulls output=wbgt_calibration_unsmoothed tension=20 --overwrite
+#r.resamp.filter input=wbgt_calibration_nulls output=wbgt_calibration filter=gauss,box radius=10,10 --overwrite
+#echo "Done."
 
-calculateForRcp() {
+calculateForRcpModel() {
+    MODEL=$2
+    SCENARIO=${1}_${2}
+    TIMESPAN=$3
+    DAY_START=$4
+    DAY_MAX=$5
+
     DAY=$DAY_START
     BANDS=""
     DELIMITER=""
@@ -34,26 +42,21 @@ calculateForRcp() {
     done
     echo "Bands: $DAY_START - $DAY_MAX"
 
-    echo "Importing $1 data..."
+    echo "Importing $SCENARIO data..."
     # Unzipped data from https://cds.climate.copernicus.eu/cdsapp#!/dataset/projections-cmip5-daily-single-levels?tab=form
     #Experiment:RCP 2.6Variable:2m temperature, Maximum 2m temperature in the last 24 hours, Mean sea level pressure, Near-surface specific humidityModel:IPSL-CM5A-MR (IPSL, France)Ensemble member:r1i1p1Period:20560101-21001231Format:Compressed tar file (.tar.gz)
     humidity=${INPUT_DIR}/climate/wbgt/huss_day_${MODEL}_${1}_r1i1p1_${TIMESPAN}.nc
     pressure=${INPUT_DIR}/climate/wbgt/psl_day_${MODEL}_${1}_r1i1p1_${TIMESPAN}.nc
     tempmax=${INPUT_DIR}/climate/wbgt/tasmax_day_${MODEL}_${1}_r1i1p1_${TIMESPAN}.nc
-    
-    #Experiment:RCP 2.6Variable:Maximum 2m temperature in the last 24 hours, Mean sea level pressure, Near-surface specific humidityModel:CSIRO-Mk3-6-0 (CSIRO, Australia)Ensemble member:r1i1p1Period:20860101-21001231Format:Compressed tar file (.tar.gz)
-    #humidity=${INPUT_DIR}/climate/wbgt/huss_day_CSIRO-Mk3-6-0_${1}_r1i1p1_20860101-21001231.nc
-    #pressure=${INPUT_DIR}/climate/wbgt/psl_day_CSIRO-Mk3-6-0_${1}_r1i1p1_20860101-21001231.nc
-    #tempmax=${INPUT_DIR}/climate/wbgt/tasmax_day_CSIRO-Mk3-6-0_${1}_r1i1p1_20860101-21001231.nc
 
     #gdalinfo NETCDF:"$humidity":huss
     #exit
     echo "Humidity..."
-    r.in.gdal input=$humidity output=wbgt_${1}_humidity band=$BANDS --overwrite -o -l
+    r.in.gdal input=$humidity output=wbgt_${SCENARIO}_humidity band=$BANDS --overwrite -o -l
     echo "Pressure..."
-    r.in.gdal input=$pressure output=wbgt_${1}_pressure band=$BANDS --overwrite -o -l
+    r.in.gdal input=$pressure output=wbgt_${SCENARIO}_pressure band=$BANDS --overwrite -o -l
     echo "Tempmax..."
-    r.in.gdal input=$tempmax output=wbgt_${1}_tempmax band=$BANDS --overwrite -o -l
+    r.in.gdal input=$tempmax output=wbgt_${SCENARIO}_tempmax band=$BANDS --overwrite -o -l
 
     echo "Calculating daily WBGT..."
     DAY=$DAY_START
@@ -63,47 +66,82 @@ calculateForRcp() {
     do  
         echo "WBGT day $DAY"
         # Chavaillaz, Yann, et al. "Exposure to excessive heat and impacts on labour productivity linked to cumulative CO2 emissions." Scientific reports 9.1 (2019): 1-11. https://doi.org/10.1038/s41598-019-50047-w
-        P_SURF="wbgt_${1}_pressure.${DAY}*exp(10,-wbgt_elev_zeroed/(18400*wbgt_${1}_tempmax.${DAY}/273.15))"
-        VP="wbgt_${1}_humidity.${DAY}*${P_SURF}/(0.622+wbgt_${1}_humidity.${DAY})"
-        RESULT="wbgt_${1}_daily.${DAY}"
-        r.mapcalc "${RESULT} = 0.567*(wbgt_${1}_tempmax.${DAY}-273.15)+0.393/100*${VP}+3.94" --overwrite
+        # with adapted constants from Lemke, Bruno, and Tord Kjellstrom. "Calculating workplace WBGT from meteorological data: a tool for climate change assessment." Industrial Health 50.4 (2012): 267-278. https://doi.org/10.2486/indhealth.MS1352
+        PRESSURE="\"wbgt_${SCENARIO}_pressure.${DAY}\""
+        TEMPMAX="\"wbgt_${SCENARIO}_tempmax.${DAY}\""
+        HUMIDITY="\"wbgt_${SCENARIO}_humidity.${DAY}\""
+        P_SURF="${PRESSURE}*exp(10,-wbgt_elev_zeroed/(18400.0*${TEMPMAX}/273.15))"
+        VP="${HUMIDITY}*${P_SURF}/(0.622+${HUMIDITY})"
+        RESULT="wbgt_${SCENARIO}_daily.${DAY}"
+        #r.mapcalc "\"${RESULT}\" = 0.567*(${TEMPMAX}-273.15)+0.393/100*${VP}+3.94" --overwrite
+        r.mapcalc "\"${RESULT}\" = 0.567*(${TEMPMAX}-273.15)+0.216/100*${VP}+3.38" --overwrite
         BANDS="${BANDS}${DELIMITER}${RESULT}"
         DELIMITER=","
         DAY=$(($DAY+1))
     done
-    echo "Calculating max WBGT for year..."
-    r.series input=${BANDS} output=wbgt_${1}_max method=quantile quantile=0.99 --overwrite
-    r.univar wbgt_${1}_max
+    echo "Calculating max WBGT for year in scenario ${SCENARIO}..."
+    r.series input=${BANDS} output=wbgt_${SCENARIO}_max method=quantile quantile=0.99 --overwrite
+    r.univar wbgt_${SCENARIO}_max
+    r.out.gdal in=wbgt_${SCENARIO}_max output=${SCRIPT_DIR}/out/${MODEL}.tiff type=Float32 --overwrite -f -c
+    r.out.png -t --overwrite input=wbgt_${SCENARIO}_max output=${SCRIPT_DIR}/out/${MODEL}.png
+}
+
+calculateForRcp() {
+    SCENARIO=$1
+
+    MODELS=""
+    DELIMITIER=""
+    for M in $2; do
+        MODELS="${MODELS}${DELIMITER}wbgt_${SCENARIO}_${M}_max"
+        DELIMITER=","
+    done
+
+    echo "Averaging over $MODELS..."
+
+    r.series input=${MODELS} output=wbgt_${SCENARIO}_max method=average --overwrite
+    r.univar wbgt_${SCENARIO}_max
 
     if [ "$1" == "historical" ]; then
         echo "Calibrating..."
-        r.mapcalc "wbgt_calibration_delta = wbgt_calibration - wbgt_${1}_max" --overwrite
+        #r.mapcalc "wbgt_calibration_delta = wbgt_calibration - wbgt_${SCENARIO}_max" --overwrite
+        r.mapcalc "wbgt_calibration_delta = \"wbgt_historical_ncep-reanalysis_max\" - wbgt_${SCENARIO}_max" --overwrite
         MEAN_CALIBRATION=$(r.univar wbgt_calibration_delta -t separator=space | tail -n +2 | awk '{ print $6 }')
-        echo "Calibration: $MEAN_CALIBRATION"
-        r.out.gdal in=wbgt_calibration_delta output=${SCRIPT_DIR}/out/calib.tiff type=Float32 --overwrite -f -c
-        r.out.png -t --overwrite input=wbgt_calibration_delta output=${SCRIPT_DIR}/out/calib.png
+        echo "Delta: $MEAN_CALIBRATION"
+        r.out.gdal in=wbgt_calibration output=${SCRIPT_DIR}/out/calib.tiff type=Float32 --overwrite -f -c
+        r.out.png -t --overwrite input=wbgt_calibration output=${SCRIPT_DIR}/out/calib.png
     fi    
 
     echo "Normalizing..."
-    #r.mapcalc "wbgt_${1} = min(15.0, max(wbgt_${1}_max-30.0, 0.0))/15.0" --overwrite
-    r.mapcalc "wbgt_${1} = min(10.0, max(wbgt_${1}_max+(${MEAN_CALIBRATION})-35.0, 0.0))/10.0" --overwrite
+    #r.mapcalc "wbgt_${SCENARIO} = min(10.0, max(wbgt_${SCENARIO}_max+wbgt_calibration_delta-35.0, 0.0))/10.0" --overwrite
+    r.mapcalc "wbgt_${SCENARIO} = min(5.0, max(wbgt_${SCENARIO}_max-35.0, 0.0))/5.0" --overwrite
+    #r.mapcalc "wbgt_${SCENARIO} = min(10.0, max(wbgt_${SCENARIO}_max+(${MEAN_CALIBRATION})-35.0, 0.0))/10.0" --overwrite
 
     echo "Done."
 }
 
-# 2005
 MEAN_CALIBRATION=0
-DAY_START=1461
-DAY_MAX=1826
-TIMESPAN=20000101-20051231
-calculateForRcp "historical"
+MODEL_LIST="IPSL-CM5A-MR bcc-csm1-1-m"
 
-# datasets have timespan 20560101-21001231 -> 45 years -> 16425 bands -> last 365 bands are year 2100
-DAY_START=16061
-DAY_MAX=16426
-TIMESPAN=20560101-21001231
-MODEL=IPSL-CM5A-MR
-calculateForRcp "rcp26"
-calculateForRcp "rcp45"
-calculateForRcp "rcp60"
-calculateForRcp "rcp85"
+calculateForRcpModel historical ncep-reanalysis 20050101-20051231 1 366
+
+# 2005
+calculateForRcpModel historical IPSL-CM5A-MR 20000101-20051231 1461 1826
+calculateForRcpModel historical bcc-csm1-1-m 20000101-20121231 1461 1826
+calculateForRcp historical "$MODEL_LIST"
+
+# IPSL datasets have timespan 20560101-21001231 -> 45 years -> 16425 bands -> last 365 bands are year 2100
+calculateForRcpModel rcp26 IPSL-CM5A-MR 20560101-21001231 16061 16426
+calculateForRcpModel rcp26 bcc-csm1-1-m 20810101-21001231 6935 7300
+calculateForRcp rcp26 "$MODEL_LIST"
+
+calculateForRcpModel rcp45 IPSL-CM5A-MR 20560101-21001231 16061 16426
+calculateForRcpModel rcp45 bcc-csm1-1-m 20810101-21001230 6935 7300
+calculateForRcp rcp45 "$MODEL_LIST"
+
+calculateForRcpModel rcp60 IPSL-CM5A-MR 20560101-21001231 16061 16426
+calculateForRcpModel rcp60 bcc-csm1-1-m 20810101-21001230 6935 7300
+calculateForRcp rcp60 "$MODEL_LIST"
+
+calculateForRcpModel rcp85 IPSL-CM5A-MR 20560101-21001231 16061 16426
+calculateForRcpModel rcp85 bcc-csm1-1-m 21000101-21001231 1 366
+calculateForRcp rcp85 "$MODEL_LIST"

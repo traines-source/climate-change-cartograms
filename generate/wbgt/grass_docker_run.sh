@@ -8,6 +8,8 @@ echo "Building image..."
 DOCKER_IMAGE=$(cat ../Dockerfile | docker build -q -)
 echo "Running..."
 
+#. prepare_ncep_reanalysis.sh
+
 docker run -it --rm \
 -e SCRIPT_DIR=${SCRIPT_DIR} \
 -e INPUT_DIR=${INPUT_DIR} \
