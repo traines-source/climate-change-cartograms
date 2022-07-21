@@ -18,8 +18,9 @@ TILE_HEIGHT=TILE_WIDTH*RATIO
 TILES_PER_ROW=4
 TRIANGLE_DIMEN=int(TILE_WIDTH*TILES_PER_ROW/TARGET_RESOLUTION[0])
 DOT_SIZE=65
-CITY_COUNT = 40
+CITY_COUNT = 45
 MAX_CITIES_PER_COUNTRY = 1
+MIN_DISTANCE_BETWEEN_CITIES_KM = 2000
 
 proj = utils.HoboDyerProj(TARGET_RESOLUTION[0])
 
@@ -47,6 +48,14 @@ def get_imagemagick_city_cmd(city):
     c = proj.transform((city['lon'], city['lat']))
     return "\( -background transparent working/dot_resized.png -repage +" + str(round(c[0]*TEXTURE_SCALE-DOT_SIZE/2, 1)) + "+" + str(round(c[1]*TEXTURE_SCALE-DOT_SIZE/2, 1)) + " \) "
 
+def min_distance(city, cities):
+    m = 40000
+    for c in cities:
+        dist = utils.geo_dist([city['lon'], city['lat']], [c['lon'], c['lat']])
+        if dist < m:
+            m = dist
+    return m
+
 cities = []
 countries = {}
 
@@ -59,19 +68,19 @@ with open('worldcities.csv', newline='') as csvfile:
 
 cities.sort(key=sort_key, reverse=True)
 
-selected_cites = []
+selected_cities = []
 imagemagick_cities_cmd = ""
 i = 0
 for city in cities:
-    if countries[city['country']] < MAX_CITIES_PER_COUNTRY:
-        selected_cites.append(city)
+    if countries[city['country']] < MAX_CITIES_PER_COUNTRY or min_distance(city, selected_cities) > MIN_DISTANCE_BETWEEN_CITIES_KM:
+        selected_cities.append(city)
         imagemagick_cities_cmd += get_imagemagick_city_cmd(city)
         countries[city['country']] += 1
         i += 1
         if i >= CITY_COUNT:
             break
 
-cities_json = to_json(selected_cites)
+cities_json = to_json(selected_cities)
 utils.write_json('working/cities.json', cities_json)
 
 with open("working/imagemagick_cities_cmd.txt", "w") as f:

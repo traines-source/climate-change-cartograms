@@ -1,5 +1,5 @@
 import pyproj
-from math import floor
+import math
 import json
 
 class Proj:    
@@ -17,7 +17,7 @@ class Proj:
         self.scale = width/(self.transform((180, 0))[0]*2)
         self.dx = self.transform((-180, 0))[0]
         self.dy = self.transform((0, 90))[1]
-        self.height = floor(self.transform((0, -90))[1])
+        self.height = math.floor(self.transform((0, -90))[1])
 
     def transform(self, lonlat):
         coord = self.unscaled_transform(lonlat)
@@ -73,3 +73,17 @@ def write_json(filename, data):
 def read_json(filename):
     with open(filename, 'r') as f:
         return json.load(f)
+
+def geo_dist(a, b):
+    R = 6371
+    psi1 = a[1] * math.pi/180;
+    psi2 = b[1] * math.pi/180;
+    dpsi = (b[1]-a[1]) * math.pi/180;
+    dlambda = (b[0]-a[0]) * math.pi/180;
+
+    a = math.sin(dpsi/2) * math.sin(dpsi/2) + math.cos(psi1) * math.cos(psi2) * math.sin(dlambda/2) * math.sin(dlambda/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+
+    return R * c
+
+
