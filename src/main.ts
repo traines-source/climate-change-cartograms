@@ -43,8 +43,17 @@ function toggleParameterCheckboxes(disabled: boolean) {
     mappings.parameters.mapping.map(param => (<HTMLInputElement>document.getElementById(param.id)).disabled = disabled);
 }
 
+function deselectOtherImpacts(selectedOption: string) {
+    if (mappings == undefined) {
+        return;
+    }
+    if (mappings.impacts.mapping.map(impact => impact.id).includes(selectedOption)) {
+        mappings.impacts.mapping.map(impact => (<HTMLInputElement>document.getElementById(impact.id)).checked = (impact.id == selectedOption));
+    }
+}
+
 function updateMap(evt?: Event) {
-    console.log(performance.now(), "update triggered")
+    console.log(performance.now(), "update triggered");
     if (mappings == undefined) {
         return;
     }
@@ -54,6 +63,7 @@ function updateMap(evt?: Event) {
         (<HTMLInputElement>document.getElementById(selectedBinary)).style.display = 'none';
         if (isChecked(id)) {
             (<HTMLInputElement>document.getElementById(id+'_description')).style.display = 'block';
+            deselectOtherImpacts(id);
         }
         selectedBinary = id+'_description';
         location.hash = '#'+permutationStr(false);
@@ -84,7 +94,8 @@ function updateMap(evt?: Event) {
 
 function updateTemperature(temperature: number) {
     const t = <HTMLElement>document.getElementById('temperature');
-    t.innerHTML = Math.round((temperature+1)*10)/10+"";
+    const deltaPreIndustrialTo19862005Mean = 1;
+    t.innerHTML = Math.round((temperature+deltaPreIndustrialTo19862005Mean)*10)/10+"";
 }
 
 function createControls() {

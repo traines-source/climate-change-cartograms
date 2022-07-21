@@ -264,6 +264,7 @@ def create_permutations(mappings):
         skip_permutation = False
         today_mode = not mappings["year"]["mapping"][0]["enabled"]
         any_impact = max(map(lambda impact: impact["enabled"], mappings["impacts"]["mapping"]))
+        multiple_impacts = sum(map(lambda impact: impact["enabled"], mappings["impacts"]["mapping"])) > 1
         any_parameters = max(map(lambda param: param["enabled"], mappings["parameters"]["mapping"]))
 
         if today_mode and not any_parameters:
@@ -272,6 +273,8 @@ def create_permutations(mappings):
             print("Buffer cleared, new metrics/impacts combo, permutations so far:", useful_permutations)
 
         if any_parameters and (today_mode or not any_impact):
+            skip_permutation = True
+        if multiple_impacts:
             skip_permutation = True
         #if not today_mode:
         #    skip_permutation = True

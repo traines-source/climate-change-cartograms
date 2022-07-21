@@ -51,6 +51,14 @@
                 },
                 "x": 6,
                 "y": -68
+            },
+            {
+                "id": "15degrees",
+                "label": {
+                    "en": "Other actions for 1.5 degrees"
+                },
+                "x": 0,
+                "y": -270
             }
         ]
 

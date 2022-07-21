@@ -47,6 +47,9 @@ msgstr ""
 msgid "buildings"
 msgstr ""
 
+msgid "15degrees"
+msgstr ""
+
 msgid "population"
 msgstr ""
 
@@ -72,6 +75,9 @@ msgid "roadtraffic_description"
 msgstr ""
 
 msgid "buildings_description"
+msgstr ""
+
+msgid "15degrees_description"
 msgstr ""
 
 msgid "population_description"

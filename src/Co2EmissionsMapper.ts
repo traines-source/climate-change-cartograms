@@ -6,7 +6,7 @@ export class Co2EmissionsMapper {
 
     calculateTemperature(mappings: MappingCollection, todayMode: boolean): number {
         const emissions = todayMode ? 0 : this.cumulateCo2Emissions(mappings);
-        console.log('Cumulated CO2 emissions:', emissions);
+        console.log('Cumulated CO2 emissions (GtC):', emissions);
         const temperature = this.interpolateMapping(mappings.impacts_scenarios.mapping, emissions);
         console.log('Temperature forecast:', temperature);
         return temperature;
