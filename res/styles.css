@@ -163,10 +163,19 @@ body {
 }
 
 .binary-description {
+    margin-top: -24px;
     background-color: #ebebeb;
     border-radius: 8px;
-    display: none;
+    height: 0;
+    opacity: 0;
     padding: 12px 24px;
+}
+.binary-description.active {
+    transition: opacity ease, margin-top ease;
+    transition-duration: 0.3s;
+    height: auto;
+    opacity: 1;
+    margin-top: -60px;
 }
 
 #footer {
@@ -200,5 +209,11 @@ body {
         margin: 0 auto;
         background-color: transparent;
         padding-top: 24px;
+    }
+    
+    .binary-description.active {
+        height: auto;
+        opacity: 1;
+        margin-top: -24px;
     }
 }

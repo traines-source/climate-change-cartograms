@@ -60,9 +60,9 @@ function updateMap(evt?: Event) {
     if (evt != undefined) {
         const id = (<HTMLInputElement>evt?.target).id;
         (<HTMLInputElement>document.getElementById(id)).className = 'loading';
-        (<HTMLInputElement>document.getElementById(selectedBinary)).style.display = 'none';
+        (<HTMLInputElement>document.getElementById(selectedBinary)).className = 'binary-description';
         if (isChecked(id)) {
-            (<HTMLInputElement>document.getElementById(id+'_description')).style.display = 'block';
+            (<HTMLInputElement>document.getElementById(id+'_description')).className = 'binary-description active';
             deselectOtherImpacts(id);
         }
         selectedBinary = id+'_description';

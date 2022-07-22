@@ -40,13 +40,13 @@ msgid "coalplants"
 msgstr "Shut down coal and gas power plants"
 
 msgid "industry"
-msgstr "Make industry CO2 neutral"
+msgstr "Make industry CO₂ neutral"
 
 msgid "roadtraffic"
 msgstr "Take freight and short distance traffic off the road"
 
 msgid "buildings"
-msgstr "Make buildings CO2 neutral"
+msgstr "Make buildings CO₂ neutral"
 
 msgid "15degrees"
 msgstr "Further actions for 1.5° target"
@@ -71,27 +71,27 @@ msgstr ""
 
 msgid "coalplants_description"
 msgstr ""
-"Coal and gas power plants are responsible for a large part of CO2 "
+"Coal and gas power plants are responsible for a large part of CO₂ "
 "emissions. Here it is assumed that of the total emissions from now until "
 "2100 according to the reference scenario, 80%% are avoided. Also see "
 "sources [7-15]."
 
 msgid "industry_description"
 msgstr ""
-"CO2 emissions by industry, e.g. during steel production. Of course, we "
+"CO₂ emissions by industry, e.g. during steel production. Of course, we "
 "are indirectly responsible for these emissions through our consumption "
-"behaviour as well. The assignment of CO2 emissions to different sectors "
+"behaviour as well. The assignment of CO₂ emissions to different sectors "
 "is not always easy. Also see sources [7-15]."
 
 msgid "roadtraffic_description"
 msgstr ""
-"Traffic in total is responsible for about 20%% of CO2 emissions. Here it "
+"Traffic in total is responsible for about 20%% of CO₂ emissions. Here it "
 "is assumed that freight traffic on the road and short distance car "
 "traffic (below about 15 km) is reduced by 80%% each."
 
 msgid "buildings_description"
 msgstr ""
-"Buildings are responsible for CO2 emissions, particularly due to heating."
+"Buildings are responsible for CO₂ emissions, particularly due to heating."
 " Here it is assumed that the emissions are reduced by 80%%. Also see "
 "sources [7-15]."
 
