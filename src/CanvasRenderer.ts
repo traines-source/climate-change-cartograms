@@ -148,7 +148,7 @@ export class CanvasRenderer implements Renderer {
             uniform sampler2D uSampler;
 
             void main(void) {
-            gl_FragColor = texture2D(uSampler, vTextureCoord);
+                gl_FragColor = texture2D(uSampler, vTextureCoord);
             }
         `;
 
@@ -161,8 +161,8 @@ export class CanvasRenderer implements Renderer {
             varying highp vec2 vTextureCoord;
 
             void main(void) {
-            gl_Position = aVertexPositionFrom*(1.0-uAnimationX)+aVertexPositionTo*uAnimationX;
-            vTextureCoord = aTextureCoord;
+                gl_Position = aVertexPositionFrom*(1.0-uAnimationX)+aVertexPositionTo*uAnimationX;
+                vTextureCoord = aTextureCoord;
             }
         `;
 

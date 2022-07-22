@@ -7,6 +7,8 @@ import { Vector } from "./Vector";
 
 export class CrumpledImage {    
     private nonce = 0;
+    private animRunning = false;
+    private animQueue: number[][] = [];
     private renderer: CommonRenderer;
     private mapper: CoordinateMapper;
 
@@ -26,6 +28,10 @@ export class CrumpledImage {
     }
 
     private update(triangles: number[], animate: boolean) {
+        if (this.animRunning) {
+            this.animQueue.push(triangles);
+            return;
+        }
         this.renderer.updateTo(triangles);
 
         this.nonce++;
@@ -37,6 +43,7 @@ export class CrumpledImage {
         console.log(performance.now(), "started update");
         
         const nonce = this.nonce;
+        this.animRunning = true;
         animator.animate(this.animationDurationMs, (x, isLast) => {
             if (this.nonce != nonce) {
                 return false;
@@ -47,6 +54,11 @@ export class CrumpledImage {
             if (isLast) {
                 this.renderer.updateFrom(triangles);
                 console.log(performance.now(), "applied update");
+                this.animRunning = false;
+                const queued = this.animQueue.shift()
+                if (queued) {
+                    this.update(queued, true);
+                }
             }
             return true;
         });       
