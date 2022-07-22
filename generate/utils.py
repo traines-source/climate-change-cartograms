@@ -33,7 +33,7 @@ class Proj:
     def sample_grid(self, sample_lambda):
         grid = []
         
-        for y in range(floor(self.height)):
+        for y in range(math.floor(self.height)):
             row = []
             for x in range(self.width):
                 row.append(sample_lambda(self.reverse_transform((x, y))))
@@ -46,7 +46,7 @@ class Proj:
         return self
 
     def __next__(self):
-        if self.i < floor(self.height)*self.width:
+        if self.i < math.floor(self.height)*self.width:
             c = self.reverse_transform((self.i%self.width, self.i//self.width))
             self.i += 1
             return c

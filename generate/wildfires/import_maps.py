@@ -16,6 +16,7 @@ hobo = utils.HoboDyerProj(400)
 MAX_DIST_LEGEND = 20
 MAX_DIST_GEO = 3
 WHITE_THRESHOLD = 10
+FREQ_ONLY = True
 
 def colorscale_legend(source, lower, upper):
     im = iio.imread(source)
@@ -184,7 +185,7 @@ datasources = [
     ("wildfire_rcp85_season_length.png", legend_season_length, "rcp85_slen"),
 ]
 
-def digitize(from_cache=True):
+def digitize(from_cache=False):
     print("Reading maps...")
     samples, values = sample_equalarea("working/wildfire_rcp85_frequency.png", legend_frequency)
     samples_data = [{} if values[i] != -1 else None for i in range(len(samples))]
@@ -227,7 +228,7 @@ def scale_down_and_sum(summaries, max_value, scenario):
     if len(summaries[scenario]["freq"]) != len(summaries[scenario]["slen"]):
         raise Exception("freq != slen")
     for i in range(len(summaries[scenario]["freq"])):
-        value = summaries[scenario]["freq"][i] / max_value["freq"] + summaries[scenario]["slen"][i] / max_value["slen"]
+        value = summaries[scenario]["freq"][i] / max_value["freq"] + (summaries[scenario]["slen"][i] / max_value["slen"] if not FREQ_ONLY else 0)
         summaries[scenario]["total"].append(value)
         if value > max_value["total"]:
             max_value["total"] = value
