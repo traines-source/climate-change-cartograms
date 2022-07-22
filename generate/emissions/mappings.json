@@ -45,20 +45,12 @@
                 "y": -143
             },
             {
-                "id": "buildings",
-                "label": {
-                    "en": "Make buildings CO2 neutral"
-                },
-                "x": 6,
-                "y": -68
-            },
-            {
                 "id": "15degrees",
                 "label": {
                     "en": "Other actions for 1.5 degrees"
                 },
-                "x": 0,
-                "y": -270
+                "x": 25,
+                "y": -338
             }
         ]
 
