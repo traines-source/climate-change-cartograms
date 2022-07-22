@@ -5,7 +5,7 @@ SCRIPT_DIR=${SCRIPT_DIR:-$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )/../" &> /
 INPUT_DIR=${INPUT_DIR:-$SCRIPT_DIR}
 
 echo "Building image..."
-DOCKER_IMAGE=$(cat ../Dockerfile | docker build -q -)
+DOCKER_IMAGE=$(cat ${SCRIPT_DIR}/Dockerfile | docker build -q -)
 echo "Running..."
 
 docker run -it --rm \
@@ -19,5 +19,5 @@ docker run -it --rm \
 $DOCKER_IMAGE \
 bash ${SCRIPT_DIR}/map/grass_run.sh
 
-mv working/map*.jpg ../../dist/
-mv working/mappings.json ../../dist/
+mv ${SCRIPT_DIR}/map/working/map*.jpg ${SCRIPT_DIR}/../dist/
+mv ${SCRIPT_DIR}/map/working/mappings.json ${SCRIPT_DIR}/../dist/
