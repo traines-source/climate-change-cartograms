@@ -1,7 +1,7 @@
 import { Vector } from "./Vector";
 
 export class CoordinateMapper {
-
+    static BUFFER_SIZE = 4096;
     readonly sX = 2/this.gridDimen.x;
     readonly sY = (-2)/this.gridDimen.y;
 
@@ -79,17 +79,20 @@ export class CoordinateMapper {
         let remainder = '';
         let lastLine: number[] = new Array(width);
         let currLine: number[] = new Array(width);
-        
-        const pump = async () => {
-            const { done, value } = await reader.read();
-            const chunk = remainder + (value ? this.textDecode(value) : "");
-            while (true) {
+
+        const defer = () => {
+            return new Promise(resolve => setTimeout(resolve));
+        }
+
+        const parse = async (chunk: string) => {
+            let buffer = 0;
+            while (buffer < CoordinateMapper.BUFFER_SIZE) {
                 let result = re.exec(chunk);
                 if (!result) {
                     remainder = chunk.substring(char);
                     char = 0;
                     re.lastIndex = 0;
-                    break;
+                    return false;
                 }
                 const x = index%width;
                 if (x == 0 && index > 0) {
@@ -104,14 +107,23 @@ export class CoordinateMapper {
                     triangles.push(currLine[x-1], currLine[x-0], lastLine[x-1], lastLine[x-0], currLine[x-3], currLine[x-2]);
                 }
                 index++;
+                buffer++;
                 char = re.lastIndex;
             }
-            return !done;
+            return true;
         }
         console.log(performance.now(), "stream start");
-        let bytesRemaining = true;
-        while (bytesRemaining) {
-            bytesRemaining = await pump();
+        while (true) {
+            const { done, value } = await reader.read();
+            const chunk = remainder + (value ? this.textDecode(value) : "");
+            let bytesRemaining = true;
+            while (bytesRemaining) {
+                await defer();
+                bytesRemaining = await parse(chunk);
+            }
+            if (done) {
+                break;
+            }
         }
         console.log(performance.now(), "stream end");
         return triangles;
