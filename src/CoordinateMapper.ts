@@ -1,7 +1,7 @@
 import { Vector } from "./Vector";
 
 export class CoordinateMapper {
-    static BUFFER_SIZE = 4096;
+    static BUFFER_SIZE = 16384;
     readonly sX = 2/this.gridDimen.x;
     readonly sY = (-2)/this.gridDimen.y;
 

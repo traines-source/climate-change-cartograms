@@ -59,6 +59,7 @@ function updateMap(evt?: Event) {
     }
     if (evt != undefined) {
         const id = (<HTMLInputElement>evt?.target).id;
+        (<HTMLInputElement>document.getElementById('loading-indicator')).className = 'loading';
         (<HTMLInputElement>document.getElementById(id)).className = 'loading';
         (<HTMLInputElement>document.getElementById(selectedBinary)).className = 'binary-description';
         if (isChecked(id)) {
@@ -82,6 +83,7 @@ function updateMap(evt?: Event) {
             crumpledMap.streamUpdate(response.body, true).then(() => {
                 if (evt != undefined) {
                     const id = (<HTMLInputElement>evt?.target).id;
+                    (<HTMLInputElement>document.getElementById('loading-indicator')).className = '';
                     (<HTMLInputElement>document.getElementById(id)).className = '';
                 }
             });            

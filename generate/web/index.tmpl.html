@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ locale }}">
 <head>
     <meta charset="utf-8">
     <link rel="alternate" href="/en/" hreflang="en" />
@@ -14,7 +14,7 @@
 
     <div id="page">
         <div class="controls" id="controls">
-            <div class="temperature">{{ gettext('temperature') }}: <span id="temperature"></span> °C</div>
+            <div class="temperature">{{ gettext('temperature') }}: <span id="temperature"></span> °C <img src="/res/loading.gif" id="loading-indicator"></div>
             {% for item in mappings.year.mapping %}
             <div><input type="checkbox" name="{{ item.id }}" id="{{ item.id }}" {{ "checked" if item.selected }}><label for="{{ item.id }}" class="toggle"><span class="off">{{ gettext('today') }}</span><span class="on">{{ gettext('2100') }}</span></label></div>
             {% endfor %}

@@ -31,7 +31,7 @@ for locale in locales:
     env.install_gettext_translations(tr, newstyle=True)
 
     tm = env.get_template('index.tmpl.html')
-    html = tm.render(mappings=mappings, binaries=binaries, credits=credits_html)
+    html = tm.render(mappings=mappings, binaries=binaries, credits=credits_html, locale=locale)
    
     Path("working/"+locale).mkdir(parents=True, exist_ok=True)
     with open("working/"+locale+"/index.html", "w") as outf:
