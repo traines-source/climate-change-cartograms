@@ -112,9 +112,9 @@ msgstr ""
 
 msgid "wildfires_description"
 msgstr ""
-"Auf der Karte dargestellt wird eine kombinierte Metrik aus der Länge der "
-"Waldbrandsaison und der Häufigkeit von Waldbränden. Durch den Klimawandel"
-" nimmt beides in vielen Regionen weltweit zu. Siehe auch Quellen [31]."
+"Auf der Karte dargestellt wird die Häufigkeit von Waldbränden. Durch den "
+"Klimawandel nimmt sowohl die Häufigkeit als auch die Länge der "
+"Waldbrandsaison in vielen Regionen weltweit zu. Siehe auch Quellen [31]."
 
 msgid "sealevel_description"
 msgstr ""
