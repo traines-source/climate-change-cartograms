@@ -1,7 +1,6 @@
 import { Vector } from "./Vector";
 
 export class CoordinateMapper {
-    static BUFFER_SIZE = 16384;
     readonly sX = 2/this.gridDimen.x;
     readonly sY = (-2)/this.gridDimen.y;
 
@@ -65,75 +64,5 @@ export class CoordinateMapper {
             }
         }
         return triangles;
-    }
-
-    async streamToCanvasCoordinates(gridCoordinates: ReadableStream<Uint8Array>): Promise<number[]> {
-        const reader = gridCoordinates.getReader();
-        const re = /\n| /gm;
-        const width = (this.gridDimen.x+1)*2;
-
-        const triangles: number[] = [];
-        
-        let char = 0;
-        let index = 0;
-        let remainder = '';
-        let lastLine: number[] = new Array(width);
-        let currLine: number[] = new Array(width);
-
-        const defer = () => {
-            return new Promise(resolve => setTimeout(resolve));
-        }
-
-        const parse = async (chunk: string) => {
-            let buffer = 0;
-            while (buffer < CoordinateMapper.BUFFER_SIZE) {
-                let result = re.exec(chunk);
-                if (!result) {
-                    remainder = chunk.substring(char);
-                    char = 0;
-                    re.lastIndex = 0;
-                    return false;
-                }
-                const x = index%width;
-                if (x == 0 && index > 0) {
-                    const tmp = lastLine;
-                    lastLine = currLine;
-                    currLine = tmp;
-                }
-                const xOrYValue = parseFloat(chunk.substring(char, result.index));
-                currLine[x] = x%2 == 0 ? xOrYValue*this.sX-1 : xOrYValue*this.sY+1;
-                if (x % 2 == 1 && x >= 3 && index > width) {
-                    triangles.push(lastLine[x-3], lastLine[x-2], currLine[x-3], currLine[x-2], lastLine[x-1], lastLine[x-0]);
-                    triangles.push(currLine[x-1], currLine[x-0], lastLine[x-1], lastLine[x-0], currLine[x-3], currLine[x-2]);
-                }
-                index++;
-                buffer++;
-                char = re.lastIndex;
-            }
-            return true;
-        }
-        console.log(performance.now(), "stream start");
-        while (true) {
-            const { done, value } = await reader.read();
-            const chunk = remainder + (value ? this.textDecode(value) : "");
-            let bytesRemaining = true;
-            while (bytesRemaining) {
-                await defer();
-                bytesRemaining = await parse(chunk);
-            }
-            if (done) {
-                break;
-            }
-        }
-        console.log(performance.now(), "stream end");
-        return triangles;
-    }
-
-    private textDecode(arr: Uint8Array) {
-        let str = '';
-        for (var i = 0; i < arr.byteLength; i++) {
-            str += String.fromCharCode(arr[i]);
-        }
-        return str;
     }
 }

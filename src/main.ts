@@ -3,6 +3,7 @@ import { CrumpledImage } from "./CrumpledImage";
 import { Dependent } from "./CommonRenderer";
 import { Mapping, MappingCollection } from "./MappingCollection";
 import { Co2EmissionsMapper as Co2EmissionsCalculator } from "./Co2EmissionsMapper";
+import { CoordinateMapper } from "./CoordinateMapper";
 
 const GRID_DIMEN = new Vector(600, 300);
 
@@ -10,8 +11,17 @@ let mappings: MappingCollection | undefined = undefined;
 let initial = true;
 let selectedBinary: string = '2100';
 
-const crumpledMap = new CrumpledImage(GRID_DIMEN, 2000);
+const mapper = new CoordinateMapper(GRID_DIMEN);
+const crumpledMap = new CrumpledImage(mapper, 2000);
 const co2Calculator = new Co2EmissionsCalculator(isChecked);
+const worker = new Worker('/dist/filestream.worker.js');
+
+worker.onmessage = (evt) => {
+    console.log(performance.now(), "s1m");
+    crumpledMap.update(<number[]><unknown>evt.data.triangles, true);
+    initial = false;
+    (<HTMLInputElement>document.getElementById('loading-indicator')).className = '';
+}; 
 
 function getBinaries(): Mapping[] {
     if (mappings == undefined) {
@@ -76,22 +86,11 @@ function updateMap(evt?: Event) {
     const temperature = co2Calculator.calculateTemperature(mappings, todayMode);
     updateTemperature(temperature);
 
-    fetch('/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv')
-    .then(response => {
-        console.log(performance.now(), "file received");
-        if (response.body != null) {
-            crumpledMap.streamUpdate(response.body, true).then(() => {
-                if (evt != undefined) {
-                    const id = (<HTMLInputElement>evt?.target).id;
-                    (<HTMLInputElement>document.getElementById('loading-indicator')).className = '';
-                    (<HTMLInputElement>document.getElementById(id)).className = '';
-                }
-            });            
-            initial = false;
-        } else {
-            console.log("Response was null");
-        }
-    });
+    console.log(performance.now(), "s0m");
+    worker.postMessage({
+        url: '/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv',
+        coordinateMapper: mapper
+    }); 
 }
 
 function updateTemperature(temperature: number) {

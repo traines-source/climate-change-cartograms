@@ -5,6 +5,7 @@
     "main": "dist/climate-change-cartograms.js",
     "directories": {},
     "devDependencies": {
+        "copy-webpack-plugin": "^11.0.0",
         "expose-loader": "^1.0.0",
         "ts-loader": "^8.3.0",
         "ts-node": "^10.4.0",

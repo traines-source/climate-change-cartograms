@@ -1,5 +1,6 @@
 const path = require('path');
 const LicensePlugin = require('webpack-license-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'production',
@@ -25,6 +26,11 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
   },
   plugins: [
-    new LicensePlugin()
+    new LicensePlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+          { from: './src/filestream.worker.js', to: 'filestream.worker.js' }
+      ]
+  })
   ],
 };

@@ -10,10 +10,8 @@ export class CrumpledImage {
     private animRunning = false;
     private animQueue: number[][] = [];
     private renderer: CommonRenderer;
-    private mapper: CoordinateMapper;
 
-    constructor(gridDimen: Vector, private animationDurationMs: number) {
-        this.mapper = new CoordinateMapper(gridDimen);
+    constructor(private mapper: CoordinateMapper, private animationDurationMs: number) {
         this.renderer = new CommonRenderer(new CanvasRenderer(this.mapper.aspectRatio()), new DependentsRenderer(this.mapper));
     }
 
@@ -23,11 +21,10 @@ export class CrumpledImage {
     }
 
     async streamUpdate(gridCoordinates: ReadableStream<Uint8Array>, animate: boolean) {
-        const triangles = await this.mapper.streamToCanvasCoordinates(gridCoordinates);
-        this.update(triangles, animate);
+              
     }
 
-    private update(triangles: number[], animate: boolean) {
+    update(triangles: number[], animate: boolean) {
         if (this.animRunning) {
             this.animQueue.push(triangles);
             return;
