@@ -20,10 +20,6 @@ export class CrumpledImage {
         this.renderer.initialize(triangles, dependents);
     }
 
-    async streamUpdate(gridCoordinates: ReadableStream<Uint8Array>, animate: boolean) {
-              
-    }
-
     update(triangles: number[], animate: boolean) {
         if (this.animRunning) {
             this.animQueue.push(triangles);

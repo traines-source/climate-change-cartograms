@@ -3,6 +3,7 @@ import { Vector } from "./Vector";
 export class CoordinateMapper {
     readonly sX = 2/this.gridDimen.x;
     readonly sY = (-2)/this.gridDimen.y;
+    readonly cells = this.gridDimen.x*this.gridDimen.y;
 
     constructor(private gridDimen: Vector) {
     }

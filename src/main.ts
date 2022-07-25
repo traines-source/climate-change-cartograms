@@ -17,8 +17,8 @@ const co2Calculator = new Co2EmissionsCalculator(isChecked);
 const worker = new Worker('/dist/filestream.worker.js');
 
 worker.onmessage = (evt) => {
-    console.log(performance.now(), "s1m");
-    crumpledMap.update(<number[]><unknown>evt.data.triangles, true);
+    const s = <number[]><unknown>evt.data;
+    crumpledMap.update(s, true);
     initial = false;
     (<HTMLInputElement>document.getElementById('loading-indicator')).className = '';
 }; 
@@ -86,7 +86,6 @@ function updateMap(evt?: Event) {
     const temperature = co2Calculator.calculateTemperature(mappings, todayMode);
     updateTemperature(temperature);
 
-    console.log(performance.now(), "s0m");
     worker.postMessage({
         url: '/dist/permutations/'+permutationStr(todayMode || !anyImpact)+'.csv',
         coordinateMapper: mapper
