@@ -83,7 +83,7 @@ calculateForRcp() {
     SCENARIO=$1
 
     MODELS=""
-    DELIMITIER=""
+    DELIMITER=""
     for M in $2; do
         MODELS="${MODELS}${DELIMITER}wbgt_${SCENARIO}_${M}_max"
         DELIMITER=","
