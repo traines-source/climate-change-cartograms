@@ -15,17 +15,19 @@ r.patch --overwrite input=$MAPS output=wbgt_elev_mosaic --overwrite
 echo "Zeroing..."
 r.mapcalc expression="wbgt_elev_zeroed = isnull(wbgt_elev_mosaic) ? 0 : wbgt_elev_mosaic" --overwrite
 
-updKDBI() {
-    r.mapcalc "${LAST_KDBI} = max(0, ${LAST_KDBI}-${PRECIPITATION}*86400+(203.2-(${LAST_KDBI}))*0.968*(exp(0.0875*(${TEMPMAX}-273.15)+1.5552)-8.3)/(1+10.88*exp(-0.001736*${ANNUAL_PRECIPITATION}*86400))/pow(10,3))" --overwrite
+updKBDI() {
+    PNET="max(0, ${PRECIPITATION}*86400-(${DAYS_SINCE_RAIN} > 0 ? 5.08 : 0))"
+    DQ="(203.2-(${LAST_KBDI}))*0.968*(exp(0.0875*(${TEMPMAX}-273.15)+1.5552)-8.3)/(1+10.88*exp(-0.001736*${ANNUAL_PRECIPITATION}*86400))/pow(10,3)"
+    r.mapcalc "${LAST_KBDI} = max(0, ${LAST_KBDI}+${DQ}-${PNET})" --overwrite
     r.mapcalc "${DAYS_SINCE_RAIN} = ${PRECIPITATION}*86400 < ${PRECIPITATION_THRESH} ? ${DAYS_SINCE_RAIN}+1 : 0" --overwrite  
 }
-initKDBI() {
+initKBDI() {
     DAY=$DAY_START
     while [ $DAY -ne $DAY_MAX ]
     do
         TEMPMAX="\"wbgt_${SCENARIO}_tempmax.${DAY}\""
         PRECIPITATION="\"wf_${SCENARIO}_precipitation.${DAY}\""
-        updKDBI
+        updKBDI
         DAY=$(($DAY+1))
     done
 }
@@ -90,14 +92,14 @@ calculateForRcpModel() {
     ANNUAL_PRECIPITATION="\"wf_${SCENARIO}_precipitation_annual\""
     r.univar wf_${SCENARIO}_precipitation_annual
 
-    LAST_KDBI="\"wf_${SCENARIO}_kdbi\""
+    LAST_KBDI="\"wf_${SCENARIO}_kbdi\""
     DAYS_SINCE_RAIN="\"wf_${SCENARIO}_dsrain\""
     PRECIPITATION_THRESH=0.01
-    r.mapcalc "${LAST_KDBI} = 0" --overwrite
-    r.mapcalc "${DAYS_SINCE_RAIN} = 0" --overwrite
-    r.univar wf_${SCENARIO}_kdbi
+    r.mapcalc "${LAST_KBDI} = 100" --overwrite
+    r.mapcalc "${DAYS_SINCE_RAIN} = 5" --overwrite
     
-    initKDBI
+    initKBDI
+    r.univar wf_${SCENARIO}_kbdi
 
     echo "Calculating daily WFs..."
     DAY=$DAY_START
@@ -115,7 +117,7 @@ calculateForRcpModel() {
         TEMP="\"wf_${SCENARIO}_temp.${DAY}\"" #K
 
         # FFDI base: Sun, Qiaohong, et al. "Global heat stress on health, wildfires, and agricultural crops under different levels of climate warming." Environment international 128 (2019): 125-136. https://doi.org/10.1016/j.envint.2019.04.025
-        # SI FFDI formula: Garcia-Prats, Alberto, Fernandes JG Tarcísio, and Molina J. Antonio. "Development of a Keetch and Byram—based drought index sensitive to forest management in Mediterranean conditions." Agricultural and Forest Meteorology 205 (2015): 40-50. http://dx.doi.org/10.1016/j.agrformet.2015.02.009
+        # SI KBDI formula: Garcia-Prats, Alberto, Fernandes JG Tarcísio, and Molina J. Antonio. "Development of a Keetch and Byram—based drought index sensitive to forest management in Mediterranean conditions." Agricultural and Forest Meteorology 205 (2015): 40-50. http://dx.doi.org/10.1016/j.agrformet.2015.02.009
         # burnability: Gannon, Colin S., and Nik C. Steinberg. "A global assessment of wildfire potential under climate change utilizing Keetch-Byram drought index and land cover classifications." Environmental Research Communications 3.3 (2021): 035002. https://doi.org/10.1088/2515-7620/abd836
         # P_SURF: Chavaillaz, Yann, et al. "Exposure to excessive heat and impacts on labour productivity linked to cumulative CO2 emissions." Scientific reports 9.1 (2019): 1-11. https://doi.org/10.1038/s41598-019-50047-w
 
@@ -129,22 +131,20 @@ calculateForRcpModel() {
         #r.univar wf_${SCENARIO}_relhum.${DAY}
         #r.univar $RELHUM_APPROX
 
-        updKDBI
-        DF="0.191*(${LAST_KDBI}+104)*pow(${DAYS_SINCE_RAIN}+1, 1.5)/(3.52*pow(${DAYS_SINCE_RAIN}+1, 1.5)+${PRECIPITATION}*86400-1)"
-        FFDI="2.0*exp(-0.450+0.987*log(${DF})-0.0345*${REL_HUM}+0.0338*(${TEMPMAX}-273.15)+0.0234*${WIND}*3.6)"
+        updKBDI
+        #DF="0.191*(${LAST_KBDI}+104)*pow(${DAYS_SINCE_RAIN}+1, 1.5)/(3.52*pow(${DAYS_SINCE_RAIN}+1, 1.5)+${PRECIPITATION}*86400-1)"
+        #FFDI="2.0*exp(-0.450+0.987*log(${DF})-0.0345*${REL_HUM}+0.0338*(${TEMPMAX}-273.15)+0.0234*${WIND}*3.6)"
 
         RESULT="wf_${SCENARIO}_daily.${DAY}"
-        r.mapcalc "\"${RESULT}\" = ${FFDI}" --overwrite
+        #r.mapcalc "\"${RESULT}\" = ${FFDI}" --overwrite
+        r.mapcalc "\"${RESULT}\" = ${LAST_KBDI}" --overwrite
 
         BANDS="${BANDS}${DELIMITER}${RESULT}"
         DELIMITER=","
         DAY=$(($DAY+1))
     done
     echo "Calculating WF for year in scenario ${SCENARIO}..."
-    r.series input=${BANDS} output=wf_${SCENARIO}_avg method=average --overwrite
-    r.univar wf_${SCENARIO}_avg
-    #r.out.gdal in=wbgt_${SCENARIO}_max output=${SCRIPT_DIR}/out/${MODEL}.tiff type=Float32 --overwrite -f -c
-    #r.out.png -t --overwrite input=wbgt_${SCENARIO}_max output=${SCRIPT_DIR}/out/${MODEL}.png
+    r.series input=${BANDS} output=wf_${SCENARIO}_avg method=average range=0,inf --overwrite
 }
 
 calculateForRcp() {
@@ -163,7 +163,7 @@ calculateForRcp() {
     r.univar wf_${SCENARIO}_avg
 
     echo "Normalizing..."
-    r.mapcalc "wf_${SCENARIO} = min(100.0, max(wf_${SCENARIO}_avg, 0.0))/100.0" --overwrite
+    r.mapcalc "wf_${SCENARIO} = min(200.0, max(wf_${SCENARIO}_avg, 0.0))/200.0" --overwrite
     echo "Done."
 }
 

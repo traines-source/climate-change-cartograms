@@ -11,7 +11,7 @@ import sys
 sys.path.append('../')
 import utils
 
-hobo = utils.HoboDyerProj(400)
+hobo = utils.HoboDyerProj(1200)
 
 MAX_DIST_LEGEND = 20
 MAX_DIST_GEO = 3
@@ -24,9 +24,7 @@ def colorscale_legend(source, lower, upper):
     return [{"color": im[i][0].tolist(), "value": round(upper-(upper-lower)*i/(height-1), 2)} for i in range(height)]
 
 
-legend_frequency = colorscale_legend("working/colorscale_legend_changes.png", -0.1, 0.1)
-legend_season_length = colorscale_legend("working/colorscale_legend_changes.png", -50, 50)
-legend_ecoregions = utils.read_json("working/ecoregions_baseline.json")
+legend_burnability = colorscale_legend("working/colorscale_legend_burnability.png", 0, 1)
 
 
 def color_dist(color1, color2):
@@ -50,12 +48,12 @@ def min_dist_to_legend(legend, pixel):
     return (min_dist, min_result["value"])
 
 class EquirectangularProjection:
-    RADIUS_GLOBE = 137.7
-    STANDARD_PARALLEL = 0.819
+    RADIUS_GLOBE = 272.7
+    STANDARD_PARALLEL = 0
     CENTRAL_PARALLEL = 0
     CENTRAL_MERIDIAN = 0
-    DX = 294.0
-    DY = 216.4
+    DX = 860
+    DY = 402.4
     #SCALE = 547619403
     SCALE = 1
 
@@ -176,18 +174,12 @@ def reduce_to_nearest(samples, samples_data, coords, values, value_field):
     return (samples, samples_data)
 
 datasources = [
-    ("ecoregions_baseline.png", legend_ecoregions, "baseline"),
-    ("wildfire_15_frequency.png", legend_frequency, "15_freq"),
-    ("wildfire_15_season_length.png", legend_season_length, "15_slen"),
-    ("wildfire_rcp26_frequency.png", legend_frequency, "rcp26_freq"),
-    ("wildfire_rcp26_season_length.png", legend_season_length, "rcp26_slen"),
-    ("wildfire_rcp85_frequency.png", legend_frequency, "rcp85_freq"),
-    ("wildfire_rcp85_season_length.png", legend_season_length, "rcp85_slen"),
+    ("burnability.png", legend_burnability, "baseline")
 ]
 
 def digitize(from_cache=False):
     print("Reading maps...")
-    samples, values = sample_equalarea("working/wildfire_rcp85_frequency.png", legend_frequency)
+    samples, values = sample_equalarea("working/burnability.png", legend_burnability)
     samples_data = [{} if values[i] != -1 else None for i in range(len(samples))]
 
     for source in datasources:
@@ -203,16 +195,14 @@ def digitize(from_cache=False):
 
     print("Writing geojson...")
     geojson = to_geojson(samples, samples_data)
-    utils.write_json("wildfires.geojson", geojson)
+    utils.write_json("working/burnability.geojson", geojson)
 
 
 
 def wf_abs_attribute(props, scenario, attribute):
     if props is None or "baseline" not in props:
         return 0
-    value = props["baseline"][attribute]
-    if scenario != "baseline":
-        value += props[scenario+"_"+attribute]
+    value = props["baseline"]
     return max(0, value)
 
 def append_and_maximize(sample, summaries, max_value, scenario, attribute):
@@ -221,18 +211,6 @@ def append_and_maximize(sample, summaries, max_value, scenario, attribute):
     if attribute_value > max_value[attribute]:
         max_value[attribute] = attribute_value
 
-def scale_down(summaries, max_value, scenario, attribute):
-    return summaries[scenario][attribute] / max_value[attribute] 
-
-def scale_down_and_sum(summaries, max_value, scenario):
-    if len(summaries[scenario]["freq"]) != len(summaries[scenario]["slen"]):
-        raise Exception("freq != slen")
-    for i in range(len(summaries[scenario]["freq"])):
-        value = summaries[scenario]["freq"][i] / max_value["freq"] + (summaries[scenario]["slen"][i] / max_value["slen"] if not FREQ_ONLY else 0)
-        summaries[scenario]["total"].append(value)
-        if value > max_value["total"]:
-            max_value["total"] = value
-    
 def write_tiff(arr, scenario):
     p = hobo
     print("min:", min(arr), "max:", max(arr))
@@ -243,9 +221,9 @@ def write_tiff(arr, scenario):
         rows[-1].append(arr[i])
 
     driver = gdal.GetDriverByName('GTiff')
-    dataset = driver.Create("out/wildfires_"+scenario+".tiff",p.width, p.height, 1, gdal.GDT_Float32 )
+    dataset = driver.Create("out/wf_burnability_"+scenario+".tiff",p.width, p.height, 1, gdal.GDT_Float32 )
     dataset.GetRasterBand(1).WriteArray(np.array(rows))
-
+    print(np.array(rows))
     tl = p.unscaled_transform((-180, 90))
     geo = (tl[0], -tl[0]*2/p.width, 0, tl[1], 0, -tl[1]*2/p.height)
     dataset.SetGeoTransform(geo)
@@ -256,33 +234,26 @@ def write_tiff(arr, scenario):
     dataset.FlushCache()
     dataset = None
 
-    im = iio.imread("out/wildfires_"+scenario+".tiff")
-    iio.imwrite("out/wildfires_"+scenario+".png", np.rint(im*255).astype(np.uint8))
+    im = iio.imread("out/wf_burnability_"+scenario+".tiff")
+    iio.imwrite("out/wf_burnability_"+scenario+".png", np.rint(im*255).astype(np.uint8))
 
 def write_tiffs():
-    samples_data = utils.read_json("wildfires.geojson")    
+    samples_data = utils.read_json("working/burnability.geojson")    
     samples = [sample["properties"] for sample in samples_data["features"]]
 
     scenarios = [
-        "baseline",
-        "15",
-        "rcp26",
-        "rcp85",
+        "baseline"
     ]
     summaries = {}
 
     for scenario in scenarios:
-        summaries[scenario] = {"freq":[], "slen":[], "total":[]}
-    max_value = {"freq":0, "slen":0, "total":0}
+        summaries[scenario] = {"total":[]}
+    max_value = {"total":0}
 
     for sample in samples:
         for scenario in scenarios:
-            append_and_maximize(sample, summaries, max_value, scenario, "freq")           
-            append_and_maximize(sample, summaries, max_value, scenario, "slen")
-    
-    for scenario in scenarios:
-        scale_down_and_sum(summaries, max_value, scenario)
-    
+            append_and_maximize(sample, summaries, max_value, scenario, "total")           
+        
     for scenario in scenarios:
         for i in range(len(summaries[scenario]["total"])):
             summaries[scenario]["total"][i] /= max_value["total"]
