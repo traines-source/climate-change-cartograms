@@ -3,7 +3,7 @@
 Mapping of the RCP scenarios to wildfire risk.
 
 Projections are based on the IPSL-CM5A-MR [1] CMIP5 model. We use the approach and the burnability factor data from [2]. For details on the used Keetch–Byram drought index (KBDI) formula, see [5]. The KBDI is calculated based on daily values for maximum 2m temperature in the last 24 hours and precipitation from the CMIP5 model for the individual RCP scenarios.
-The daily values are averaged for the year 2100 (or 2005, for the baseline) and multiplied with the burnability factor. The KBDI is initialized by using the respective year as a run-up period before starting the actual projections for that year. This appears to sufficiently stabilize the KBDI.
+The daily values with a value above 100 (i.e. a high wildfire risk, corresponds to 400 in the American version of the KBDI) are counted for the year 2100 (or 2005, for the baseline) and multiplied with the burnability factor. The KBDI is initialized by using the respective year as a run-up period before starting the actual projections for that year. This appears to sufficiently stabilize the KBDI.
 
 The KBDI in conjunction with the burnability factor is still only an estimate of wildfire risk, not of actual wildfire occurence. The McArthur Forest Fire Danger Index (FFDI) [3] on top of the KBDI might be more meaningful, as in [4]. The burnability factor stays constant over all scenarios, thus not taking into account possible alterations of vegetation etc. (cf. [2]).
 

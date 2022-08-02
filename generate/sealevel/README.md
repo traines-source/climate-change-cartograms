@@ -1,6 +1,6 @@
-# Sealevel Rise
+# Sea level Rise
 
-Sealevel rise is projected according to [1], i.e. about 1.5m for RCP8.5 relative to 1986-2005 mean. For the impact mapping, local 1-year coastal flood return levels ("CoastalDEM_RL1_p50") are taken into account according to [2]. Since CoastalDEM is unfortunately not publicly available, an estimate of impacted regions for each RCP scenario has been rederived based on the "Total current population (millions) occupying vulnerable land" by country/territory from [2], population data from [3], the national identifier grid from [4], and, most importantly, SRTM elevation data from [5]. Be aware that this introduces endogeneity issues for the combined population-sealevel cartograms, since the population data has already been used to estimate the impacted land area.
+Sea level rise is projected according to [1], i.e. about 1.5m for RCP8.5 relative to 1986-2005 mean. For the impact mapping, local 1-year coastal flood return levels ("CoastalDEM_RL1_p50") are taken into account according to [2]. Since CoastalDEM is unfortunately not publicly available, an estimate of impacted regions for each RCP scenario has been rederived based on the "Total current population (millions) occupying vulnerable land" by country/territory from [2], population data from [3], the national identifier grid from [4], and, most importantly, SRTM elevation data from [5]. Be aware that this introduces endogeneity issues for the combined population-sealevel cartograms, since the population data has already been used to estimate the impacted land area.
 
 Grid pixels have values between 0 (not impacted by flooding, or already under water today), and 1 (impacted by flooding).
 
