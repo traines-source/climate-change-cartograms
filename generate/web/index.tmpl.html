@@ -7,6 +7,7 @@
     <title>Climate Change Cartograms</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=3,user-scalable=yes">
     <link href="/res/styles.css" type="text/css" rel="stylesheet">
+    <script src="/dist/climate-change-cartograms.js"></script>
 </head>
 
 <body>
@@ -51,7 +52,11 @@
     <div id="footer">
         <a href="/en/" hreflang="en">EN</a> | <a href="/de/" hreflang="de">DE</a> | <a href="https://traines.eu/impressum.html">{{ gettext('imprint') }}</a>
     </div>
-    <script src="/dist/climate-change-cartograms.js"></script>
+    <script>
+        const GRID_DIMEN = new CCC.Vector(600, 300);
+        const mapManager = new CCC.MapManager(GRID_DIMEN, 2000);
+        mapManager.loadMappings();
+    </script>
     
 </body>
 </html>

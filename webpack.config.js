@@ -12,6 +12,7 @@ module.exports = {
       {
         test:  /\.tsx?$/,
         use: [
+          {loader: 'expose-loader', options: { exposes: [{globalName: 'CCC', override: true}]}},
           {loader: 'ts-loader', options: {onlyCompileBundledFiles: true}}
         ],
         include: /src/,
