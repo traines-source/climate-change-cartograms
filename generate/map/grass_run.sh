@@ -25,7 +25,7 @@ convert dot.png -resize ${DOT_SIZE}x working/dot_resized.png
 photo=${INPUT_DIR}/world_2km/world.topo.200407.3x21600x10800.png
 gdalwarp -overwrite -r bilinear -ts 21600 0 -s_srs 'epsg:4326' -t_srs "$hoboDyer" $photo ${INPUT_DIR}/world_500m/equalarea/21600.tif
 
-echo "convert ${INPUT_DIR}/world_500m/equalarea/21600.tif -gravity north \( -size 21600x10800 xc:transparent $(cat working/imagemagick_cities_cmd.txt) -flatten \) -composite working/map.tif" | bash
+echo "convert ${INPUT_DIR}/world_500m/equalarea/21600.tif -fill '#020514' -stroke none -draw 'rectangle 0,10125 21600,10800' -gravity north \( -size 21600x10800 xc:transparent $(cat working/imagemagick_cities_cmd.txt) -flatten \) -composite working/map.tif" | bash
 echo "Downsampling..."
 convert working/map.tif -gravity north -resize 16384x -extent 16384x8192 working/map_16384x.jpg
 convert working/map.tif -gravity north -resize 8192x -extent 8192x4096 working/map_8192x.jpg

@@ -40,7 +40,7 @@ msgid "coalplants"
 msgstr "Shut down coal and gas power plants"
 
 msgid "industry"
-msgstr "Make industry CO₂ neutral"
+msgstr "Decarbonize industry"
 
 msgid "roadtraffic"
 msgstr "Take freight and short distance traffic off the road"

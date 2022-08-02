@@ -67,6 +67,11 @@ export class MapManager {
             this.mappings.impacts.mapping.map(impact => (<HTMLInputElement>document.getElementById(impact.id)).checked = (impact.id == selectedOption));
         }
     }
+
+    private setClassName(id: string, className: string) {
+        const e = (<HTMLInputElement>document.getElementById(id));
+        if (e) e.className = className;
+    }
     
     private updateMap(evt?: Event) {
         console.log(performance.now(), "update triggered");
@@ -76,15 +81,15 @@ export class MapManager {
         }
         if (evt != undefined) {
             const id = (<HTMLInputElement>evt?.target).id;
-            (<HTMLInputElement>document.getElementById('loading-indicator')).className = 'loading';
-            (<HTMLInputElement>document.getElementById(id)).className = 'loading';
-            (<HTMLInputElement>document.getElementById(this.selectedBinary)).className = 'binary-description';
+            this.setClassName('loading-indicator', 'loading');
+            this.setClassName(id, 'loading');
+            this.setClassName(this.selectedBinary, 'binary-description');
             if (this.isChecked(id)) {
-                (<HTMLInputElement>document.getElementById(id+'_description')).className = 'binary-description active';
+                this.setClassName(id+'_description', 'binary-description active');
                 this.deselectOtherImpacts(id);
             }
             this.selectedBinary = id+'_description';
-            location.hash = '#'+this.permutationStr(false);
+            //location.hash = '#'+this.permutationStr(false);
         }
         const todayMode = !this.isChecked(this.mappings.year.mapping[0].id);
         const anyImpact = this.mappings.impacts.mapping.map(impact => this.isChecked(impact.id)).reduce((a, b) => a || b);
@@ -93,10 +98,10 @@ export class MapManager {
         const temperature = this.co2Calculator.calculateTemperature(this.mappings, todayMode);
         this.updateTemperature(temperature);
     
-        this.fetchPermutation('/dist/permutations/'+this.permutationStr(todayMode || !anyImpact)+'.csv'); 
+        this.fetchMapFile('/dist/permutations/'+this.permutationStr(todayMode || !anyImpact)+'.csv'); 
     }
 
-    public fetchPermutation(url: string) {
+    public fetchMapFile(url: string) {
         this.worker.postMessage({
             url: url,
             coordinateMapper: this.mapper
@@ -118,12 +123,12 @@ export class MapManager {
         if (controls == undefined)
             throw new Error("Can't populate controls")
     
-        this.setState(window.location.hash.replace('#', ''));
+        this.setPermutation(window.location.hash.replace('#', ''));
     }
     
-    public setState(state: string) {
+    public setPermutation(permutation: string) {
         const binaries = this.getBinaries();
-        const states = state.split('_').map(b => b.split('-')[1]);
+        const states = permutation.split('_').map(b => b.split('-')[1]);
         for (let i=0; i<binaries.length; i++) {
             const el = <HTMLInputElement>document.getElementById(binaries[i].id);
             el.onchange = evt => this.updateMap(evt);

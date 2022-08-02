@@ -53,10 +53,8 @@
         <a href="/en/" hreflang="en">EN</a> | <a href="/de/" hreflang="de">DE</a> | <a href="https://traines.eu/impressum.html">{{ gettext('imprint') }}</a>
     </div>
     <script>
-        const GRID_DIMEN = new CCC.Vector(600, 300);
-        const mapManager = new CCC.MapManager(GRID_DIMEN, 2000);
+        const mapManager = new CCC.MapManager(new CCC.Vector(600, 300), 2000);
         mapManager.loadMappings();
-    </script>
-    
+    </script>    
 </body>
 </html>
