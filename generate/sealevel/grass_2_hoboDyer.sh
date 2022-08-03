@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-SKM_PER_PIXEL=703.78
+SKM_PER_PIXEL=703.78 # for 1200x
 
 g.region $(r.proj input=sealevel_population output=sealevel_population location=wgs84 mapset=PERMANENT method=bilinear_f -g)
 g.region nsres=26528 ewres=26528 # 1200x

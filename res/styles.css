@@ -39,6 +39,7 @@ body {
 }
 
 #container {
+    margin-top: 20px;
     position: relative;
     display: inline-block;
     overflow: hidden;

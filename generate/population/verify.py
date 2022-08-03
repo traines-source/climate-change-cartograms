@@ -1,7 +1,7 @@
 import imageio as iio
 import numpy as np
 
-im = iio.imread('out/population2020.tiff')
+im = iio.imread('out/population_baseline.tiff')
 max_encountered_density = 30000
 
 print(im)

@@ -12,7 +12,7 @@ The "densities" from the TIFF files are then merged in all permutations of metri
 
 * [Sea level rise](sealevel/)
 * [Wet-Bulb Globe Temperature](wbgt/)
-* [Wildfires](wildfires/)
+* [Wildfire risk](wildfires/)
 
 ## Other supporting data
 
