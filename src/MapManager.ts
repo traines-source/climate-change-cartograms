@@ -165,9 +165,9 @@ export class MapManager {
         .then(json => {
             this.mappings = json;
             this.createControls();
-            //window.setTimeout(() => {
+            window.setTimeout(() => {
                 this.crumpledMap.initialize(this.createCities(json["cities"]["mapping"]));
-            //}, 1);      
+            }, 1);      
         });
     }
  
