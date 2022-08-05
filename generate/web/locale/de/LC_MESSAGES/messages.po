@@ -140,6 +140,12 @@ msgstr ""
 "dargestellt sind Orte, die mehrfach im Jahr Kühlgrenztemperaturen von "
 "über 35°C erreichen. Siehe auch Quellen [24-30]."
 
+msgid "title"
+msgstr "Anamorphe Karten zum Klimawandel"
+
+msgid "walkthrough"
+msgstr "Video-Walkthrough"
+
 msgid "about_title"
 msgstr "Über diese Karte"
 

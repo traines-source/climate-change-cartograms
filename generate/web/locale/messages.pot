@@ -92,6 +92,12 @@ msgstr ""
 msgid "wbgt_description"
 msgstr ""
 
+msgid "title"
+msgstr ""
+
+msgid "walkthrough"
+msgstr ""
+
 msgid "about_title"
 msgstr ""
 

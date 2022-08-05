@@ -2,6 +2,8 @@
 
 Cartograms are maps that, instead of representing geographic reality, are distorted according to some metric. Here, they are used to depict the impact of climate change on our planet.
 
+See it in action at https://cli-mat.traines.eu
+
 This project started with the aim of interactively visualizing climate change on a global map. The idea to use cartograms has been inspired and influenced by sources [1-5]. For more information about the underlying algorithms and data and their sources, see the [generate/](generate/) directory.
 
 The source code in this repository is licensed under the MIT license. Please note that some algorithms and data contained in this repository are subject to different licenses, as indicated in the respective readmes and/or in the files themselves.

@@ -113,7 +113,7 @@ msgstr ""
 
 msgid "wildfires_description"
 msgstr ""
-"Depicted on the map is a measure of cumulated yearly wildfire risk. Due "
+"Depicted on the map is a measure of cumulative yearly wildfire risk. Due "
 "to climate change, both the frequency and the wildfire season length "
 "increase in many regions around the world. Also see sources [31-34]."
 
@@ -137,6 +137,12 @@ msgstr ""
 "conditioning – even in the shade and with enough water. 30°C are already "
 "dangerous. Places that reach wet-bulb temperatures of more than 35°C "
 "multiple times a year are shown on the map. Also see sources [24-30]."
+
+msgid "title"
+msgstr "Climate Change Cartograms"
+
+msgid "walkthrough"
+msgstr "Video walkthrough"
 
 msgid "about_title"
 msgstr "About this map"

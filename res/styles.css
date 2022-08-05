@@ -35,7 +35,15 @@ body {
     font-family: 'Roboto Condensed', sans-serif;
     font-weight: 400;
     font-size: 16px;
+}
+
+#wrapper {
     background-color: #020514;
+
+}
+#wrapper > div {
+    margin: 0 auto;
+    max-width: 2800px;
 }
 
 #container {
@@ -149,6 +157,10 @@ body {
     margin: 12px auto;
 }
 
+.about {
+    position: relative;
+}
+
 .binary-description {
     margin-top: -24px;
     background-color: #ebebeb;
@@ -156,6 +168,7 @@ body {
     height: 0;
     opacity: 0;
     padding: 12px 24px;
+    position: relative;
 }
 .binary-description.active {
     transition: opacity ease, margin-top ease;

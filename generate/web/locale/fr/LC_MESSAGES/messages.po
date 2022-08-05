@@ -1,0 +1,199 @@
+# French translations for PROJECT.
+# Copyright (C) 2022 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-03-22 21:27+0000\n"
+"PO-Revision-Date: 2022-08-05 09:35+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+msgid "temperature"
+msgstr "Réchauffement global"
+
+msgid "parameters"
+msgstr "Actions"
+
+msgid "metrics"
+msgstr "Affecté"
+
+msgid "impacts"
+msgstr "Effets"
+
+msgid "2100"
+msgstr "2100"
+
+msgid "today"
+msgstr "Aujourd'hui"
+
+msgid "coalplants"
+msgstr "Arrêter les centrales à charbon et gaz"
+
+msgid "industry"
+msgstr "Décarboner l'industrie"
+
+msgid "roadtraffic"
+msgstr "Retirer le trafic de marchandises et trajets courts des routes"
+
+msgid "buildings"
+msgstr "Rendre les bâtiments neutres en CO₂"
+
+msgid "15degrees"
+msgstr "Actions supplémentaires pour l'objectif de 1.5°"
+
+msgid "population"
+msgstr "Population"
+
+msgid "wildfires"
+msgstr "Incendies de forêt"
+
+msgid "sealevel"
+msgstr "Élévation du niveau de la mer"
+
+msgid "wbgt"
+msgstr "Chaleur insupportable"
+
+msgid "2100_description"
+msgstr ""
+"L'état de la terre en l'an 2100 selon un scénario de référence, qui "
+"prévoit un réchauffement climatique de 3,3°C – ou moins, si des mesures "
+"appropriées sont prises. Voir aussi sources [7-15]."
+
+msgid "coalplants_description"
+msgstr ""
+"Les centrales électriques au charbon et au gaz sont responsables d'une "
+"grande partie des émissions de CO₂. On suppose ici que sur les émissions "
+"totales d'ici 2100 selon le scénario de référence, 80%% sont évitées. "
+"Voir aussi sources [7-15]."
+
+msgid "industry_description"
+msgstr ""
+"Émissions de CO₂ par l'industrie, par ex. lors de la production d'acier. "
+"Bien sûr, nous sommes également indirectement responsables de ces "
+"émissions via notre comportement de consommation. L'allocation des "
+"émissions de CO₂ aux différents secteurs n'est pas toujours facile. Voir "
+"aussi sources [7-15]."
+
+msgid "roadtraffic_description"
+msgstr ""
+"Le trafic au total est responsable d'environ 20%% des émissions de CO₂. "
+"Ici, on suppose que le trafic de marchandises sur les routes et le trafic"
+" automobile sur de courtes distances (moins d'environ 15 km) sont réduits"
+" de 80%% chacun. Voir aussi sources [7-15]."
+
+msgid "buildings_description"
+msgstr ""
+"Les bâtiments sont responsables d'émissions de CO₂, notamment dues au "
+"chauffage. Ici, on suppose que les émissions sont réduites de 80%%. Voir "
+"aussi sources [7-15]."
+
+msgid "15degrees_description"
+msgstr ""
+"Afin de limiter le réchauffement climatique à 1.5 degrés Celsius, de "
+"nombreux autres problèmes doivent être résolus. Par exemple, le chauffage"
+" des bâtiments, la production de ciment, l'agriculture et la consommation"
+" de produits d'origine animale. Voir aussi sources [7-15]."
+
+msgid "population_description"
+msgstr ""
+"Si le bouton \"Population\" est activé, les impacts sont multipliés par "
+"le densité de population. Autrement dit, la taille des zones sur la carte"
+" est proportionnelle à l'impact sur les personnes vivant dans ces zones. "
+"La densité de population pour l'année 2100 est projetée en utilisant la "
+"croissance démographique estimée au niveau de chaque pays. Voir aussi "
+"sources [18-20]."
+
+msgid "wildfires_description"
+msgstr ""
+"La carte représente une mesure du risque annuel cumulé d'incendie de "
+"forêt. En raison du changement climatique, la fréquence et la durée de la"
+" saison des feux de forêt augmentent dans de nombreuses régions du monde."
+" Voir aussi sources [31-34]."
+
+msgid "sealevel_description"
+msgstr ""
+"Sur cette carte, les zones qui disparaissent ne sont pas submergées par "
+"l'eau, elles ne sont au contraire pas impactées par l'élévation du niveau"
+" de la mer. Les zones représentées se situent sous le niveau de la mer "
+"ou, statistiquement parlant, subissent des inondations au moins une fois "
+"par an, par exemple en raison de raz-de-marées. Aujourd'hui déjà, "
+"certaines zones terrestres se situent sous le niveau de la mer. En raison"
+" du changement climatique, le niveau de la mer va probablement monter de "
+"plus d'un mètre. Cela augmente le danger d'érosion, d'inondation et de "
+"salinisation et rend de plus en plus difficiles les mesures préventives "
+"telles que les digues. Voir aussi sources [21-23]."
+
+msgid "wbgt_description"
+msgstr ""
+"Les humains transpirent pour éviter la surchauffe. Quand l'air est non "
+"seulement chaud, mais aussi très humide, ça ne marche plus. La sueur ne "
+"peut plus s'évaporer, le corps ne peut plus se refroidir. Une température"
+" dite de thermomètre mouillé de 35°C est la limite théorique à laquelle "
+"un être humain peut survivre sans climatisation – même à l'ombre et avec "
+"suffisamment d'eau. 30°C sont déjà dangereux. Les endroits qui atteignent"
+" des températures du thermomètre mouillé de plus de 35 °C plusieurs fois "
+"par an sont indiqués sur la carte. Voir aussi sources [24-30]."
+
+msgid "title"
+msgstr "Cartogrammes changement climatique"
+
+msgid "walkthrough"
+msgstr "Présentation en video"
+
+msgid "about_title"
+msgstr "À propos de cette carte"
+
+msgid "about"
+msgstr ""
+"Cette carte ne montre pas la réalité géographique, mais la réalité du "
+"changement climatique. Selon ce que vous sélectionnez, elle montre les "
+"zones ou les gens qui seront les plus touchées par les incendies de "
+"forêt, l'élévation du niveau de la mer et la chaleur insupportable. Les "
+"lieux sont agrandis ou rétrécis si ils sont très affectés ou moins "
+"affectés respectivement. Ainsi, des effets régionaux qui peuvent "
+"toutefois toucher beaucoup de monde sont rendus visibles sur une carte du"
+" monde. Dans un monde parfait sans impacts négatifs, cette carte serait "
+"donc vide."
+
+msgid "disclaimer"
+msgstr ""
+"Veuillez garder à l'esprit que les impacts exacts du changement "
+"climatique sont difficiles à prévoir, encore plus au niveau régional. "
+"Cette carte pourrait les exagérer, mais il est plus probable qu'elle les "
+"sous-estime. Il existe de nombreux points de basculement et boucles de "
+"rétroaction qui sont mal compris, et s'ils sont déclenchés, ils "
+"pourraient conduire à des effets encore plus extrêmes et auto-"
+"amplifiants. Veuillez également noter qu'il existe de nombreux autres "
+"effets du changement climatique qui ne sont pas (encore) représentés sur "
+"cette carte."
+
+msgid "credits_title"
+msgstr "Sources"
+
+msgid "credits"
+msgstr ""
+"L'idée de ce projet a été inspirée et influencée par les sources [1-5]. "
+"Voir les liens respectifs pour d'autres prises sur ces cartes dites "
+"cartogrammes. De plus, pour ce projet, des données et des algorithmes "
+"provenant de sources [6-34] ont été utilisés. Pour plus de détails sur "
+"les sources de données et la préparation, veuillez consulter le code "
+"source de ce projet à"
+
+msgid "imprint"
+msgstr "Mentions légales/Protection des données"
+
+msgid "webglerror"
+msgstr ""
+"La carte est en cours de chargement... Si la carte ne s'affiche pas, "
+"veuillez essayer de recharger la page ou essayez un autre navigateur."
+

@@ -61,7 +61,7 @@ export class CanvasRenderer implements Renderer {
     private resizeCanvas() {
         if (window.devicePixelRatio == this.pixelRatio) {
             console.log("resize triggered")
-            const w = document.documentElement.clientWidth || document.body.clientWidth;
+            const w = Math.min(2800, document.documentElement.clientWidth || document.body.clientWidth);
             const h = w/this.aspectRatio;
             const resRatio = window.devicePixelRatio || 1;
             this.canvas.width = w*resRatio;

@@ -23,7 +23,7 @@ binaries.extend(mappings["parameters"]["mapping"])
 binaries.extend(mappings["metrics"]["mapping"])
 binaries.extend(mappings["impacts"]["mapping"])
 
-locales = ["en", "de"]
+locales = ["en", "de", "fr"]
 for locale in locales:
     print(locale)
     tr = gettext.translation(domain='messages', localedir='locale/', languages=[locale])

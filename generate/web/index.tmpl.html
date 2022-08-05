@@ -2,16 +2,23 @@
 <html lang="{{ locale }}">
 <head>
     <meta charset="utf-8">
-    <link rel="alternate" href="/en/" hreflang="en" />
-    <link rel="alternate" href="/de/" hreflang="de" />
-    <title>Climate Change Cartograms</title>
+    <link rel="alternate" href="https://cli-mat.traines.eu/en/" hreflang="en" />
+    <link rel="alternate" href="https://cli-mat.traines.eu/de/" hreflang="de" />
+    <link rel="alternate" href="https://cli-mat.traines.eu/fr/" hreflang="fr" />
+    <title>{{ gettext('title') }}</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=3,user-scalable=yes">
+    <link href="https://traines.eu/favicon.ico" type="image/x-icon" rel="shortcut icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://traines.eu/res/icon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://traines.eu/res/icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://traines.eu/res/icon/favicon-16x16.png">
     <link href="/res/styles.css" type="text/css" rel="stylesheet">
     <script src="/dist/climate-change-cartograms.js"></script>
 </head>
 
 <body>
-    <div id="container"><span id="error">{{ gettext('webglerror') }}</span><canvas id="map"></canvas></div>
+    <div id="wrapper"><div>
+        <div id="container"><span id="error">{{ gettext('webglerror') }}</span><canvas id="map"></canvas></div>
+    </div></div>
 
     <div id="page">
         <div class="controls" id="controls">
@@ -41,6 +48,7 @@
             </div>
             {% endfor %}
             <h3>{{ gettext('about_title') }}</h3>
+            <p class="about"><a href="https://youtu.be/dZDKwwXl4d0">{{ gettext('walkthrough') }}</a></p>
             <p class="about">{{ gettext('about') }}</p>
             <p>{{ gettext('disclaimer') }}</p>
             <h3>{{ gettext('credits_title') }}</h3>
@@ -50,10 +58,10 @@
     </div>
 
     <div id="footer">
-        <a href="/en/" hreflang="en">EN</a> | <a href="/de/" hreflang="de">DE</a> | <a href="https://traines.eu/impressum.html">{{ gettext('imprint') }}</a>
+        <a href="/en/" hreflang="en">EN</a> | <a href="/de/" hreflang="de">DE</a> | <a href="/fr/" hreflang="fr">FR</a> | <a href="https://traines.eu/impressum.html">{{ gettext('imprint') }}</a>
     </div>
     <script>
-        const mapManager = new CCC.MapManager(new CCC.Vector(600, 300), 2000);
+        const mapManager = new CCC.MapManager(new CCC.Vector(600, 300), 3000);
         mapManager.loadMappings();
     </script>    
 </body>
